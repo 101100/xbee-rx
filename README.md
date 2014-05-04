@@ -1,4 +1,5 @@
-# xbee-promise, an XBee promise-based API
+# xbee-promise
+#### An XBee promise-based API
 
 The [xbee-promise](http://github.com/101100/xbee-promise/) [Node.js](http://nodejs.org/)
 module wraps the [xbee-api](http://github.com/jouz/xbee-api/) module with a promise-based
@@ -82,7 +83,6 @@ xbee.localCommand({
 });
 ```
 
-
 ### Remote commands
 
 Remote commands may be performed using the `remoteCommand` fuction.  They are similar
@@ -125,6 +125,35 @@ xbee.remoteCommand({
 });
 ```
 
+### Remote transmission
+
+Remote commands may be performed using the `remoteTransmit` fuction.  The destination
+is set in the same manner as for remote commands.  The text to send is given with
+the `data` parameter.
+
+```javascript
+xbee.remoteTransmit({
+    // this ID must be set on the target node with ATNI
+    destinationId: "FUNNODE",
+    data: "I'm sending you text, FUNNODE!"
+}).then(function (response) {
+    // response will be true for a successful transmision
+    console.log("Text sent to FUNNODE!");
+}).catch(function (e) {
+    console.log("Command failed:\n", e);
+}).fin(function () {
+    xbee.close();
+});
+```
+
 Some more examples can be found in
 [the repository](https://github.com/101100/xbee-promise/tree/master/examples).
+
+## Planned future work
+
+Future planned expansion of this module include:
+- Adding command line tool to perform all three types of commands (for testing, etc).
+- Translating inputs and outputs of commands logically.  E.g. ATNI command should
+  return a string, not an array of character codes, ATD1 (and friends) should accept
+  numeric values, and not require them to be in a byte array of the correct length.
 
