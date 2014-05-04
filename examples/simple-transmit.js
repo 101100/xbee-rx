@@ -18,7 +18,9 @@ var xbee = xbeePromise({
     serialport: '/dev/ttyUSB0',
     serialportOptions: {
         baudrate: 57600
-    }
+    },
+    // turn on debugging to see what the library is doing
+    debug: false
 });
 
 var destinationId = process.argv && process.argv[2];
