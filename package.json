@@ -1,0 +1,33 @@
+{
+    "name": "xbee-promise",
+    "version": "0.5.0",
+    "homepage": "https://github.com/101100/xbee-promise",
+    "description": "Promise-based library for XBee wireless modules based on xbee-api",
+    "keywords": [ "xbee", "zigbee", "script", "promise", "serialport" ],
+    "author": {
+        "name": "Jason Heard",
+        "email": "jpheard@ucalgary.ca"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/101100/xbee-promise.git"
+    },
+    "bugs": {
+        "url": "https://github.com/101100/xbee-promise/issues"
+    },
+    "licenses": [ {
+        "type": "MIT",
+        "url": "https://github.com/101100/xbee-promise/blob/master/LICENSE"
+    } ],
+    "main": "./lib/xbee-promise.js",
+    "engines": {
+        "node": ">= 0.10.0"
+    },
+    "dependencies": {
+        "parambulator": ">= 0.1.5",
+        "q": "~1.0",
+        "serialport": ">= 1.4.0",
+        "xbee-api": ">= 0.3.5"
+    }
+}
+
