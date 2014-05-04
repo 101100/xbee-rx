@@ -1,6 +1,6 @@
 {
     "name": "xbee-promise",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "homepage": "https://github.com/101100/xbee-promise",
     "description": "Promise-based library for XBee wireless modules based on xbee-api",
     "keywords": [ "xbee", "zigbee", "script", "promise", "serialport" ],
