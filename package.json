@@ -28,6 +28,17 @@
         "q": "~1.0",
         "serialport": ">= 1.4.0",
         "xbee-api": ">= 0.3.5"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.4",
+        "grunt-cli": "~0.1.13",
+        "grunt-jslint": "~1.1.8",
+        "grunt-simple-mocha": "~0.4.0",
+        "grunt-contrib-watch": "~0.6.1"
+    },
+    "scripts": {
+        "test": "grunt test",
+        "watch": "grunt watch"
     }
 }
 
