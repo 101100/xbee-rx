@@ -1,7 +1,7 @@
 /*jslint node:true */
 
 /*
- * blink.js
+ * examples/blink.js
  * https://github.com/101100/xbee-promise
  *
  * Example that blinks a LED on AD1 on a remote module

@@ -1,7 +1,7 @@
 /*jslint node:true */
 
 /*
- * simple-local.js
+ * examples/simple-local.js
  * https://github.com/101100/xbee-promise
  *
  * Simple example showing the use of localCommand and the returned promise.
