@@ -1,6 +1,8 @@
 # xbee-promise
 #### An XBee promise-based API
 
+[![NPM version](https://badge.fury.io/js/xbee-promise.svg)](http://badge.fury.io/js/xbee-promise)
+
 The [xbee-promise](http://github.com/101100/xbee-promise/) [Node.js](http://nodejs.org/)
 module wraps the [xbee-api](http://github.com/jouz/xbee-api/) module with a promise-based
 API for [ZigBee](http://en.wikipedia.org/wiki/ZigBee) modules.  It may work with older
@@ -25,7 +27,7 @@ a number.  On unix and OS X machines, this will typically be `/dev/tty???`, wher
 `???` can be anything from `USB0` to `.usbserial-A4013E5P`. In addition, you will
 need to make sure that the module connected to your machine is in API mode and that
 you know the baudrate it is set to.  By default, the baudrate is 57600 when API
-mode is used.  Once these details are known, you can initialize xbee-promise:
+mode is used.  In addition, you will need to know if you are using a ZigBee module, a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this library works between the ZigBee and ZNet modules.  Older series 2 modules have ZNet firmware and can typically be upgraded to ZigBee firmware.)  Once these details are known, you can initialize xbee-promise:
 
 ```javascript
 var xbeePromise = require('xbee-promise');
@@ -34,7 +36,8 @@ var xbee = xbeePromise({
     serialport: '/dev/ttyUSB0',
     serialPortOptions: {
         baudrate: 57600
-    }
+    },
+    module: "ZigBee"
 });
 ```
 
@@ -86,8 +89,9 @@ xbee.localCommand({
 ### Remote commands
 
 Remote commands may be performed using the `remoteCommand` fuction.  They are similar
-to local commands, but must have either a `destination64` 64 bit address or a
-`destinationId` node ID to indicate the target of the command.
+to local commands, but must have either a `destination64` 64 bit address, a
+`destination16` 16 bit address or a `destinationId` node ID to indicate the target of
+the command.  `destinationId` is not supported by 802.15.4 modules.
 
 ```javascript
 xbee.remoteCommand({
@@ -109,10 +113,29 @@ xbee.remoteCommand({
 
 ```javascript
 xbee.remoteCommand({
+    // ATD3
+    // get the status of digital pin 3
+    command: "D3",
+    // destination addresses can be in hexidecimal or byte arrays
+    destination16: [ 0xa9, 0x78 ]
+}).then(function (response) {
+    // response will be a single value in an array, e.g. [ 1 ]
+    console.log("ATD3 response from FUNNODE:\n", response);
+}).catch(function (e) {
+    console.log("Command failed:\n", e);
+}).fin(function () {
+    xbee.close();
+});
+```
+
+
+```javascript
+xbee.remoteCommand({
     // ATD1 4
     // Turn digital output 1 off
     command: "D1",
     commandParameter: [ 4 ],
+    // destination addresses can be in hexidecimal or byte arrays
     // serial number from the bottom of the module (or combination of ATSH and ATSL)
     destination64: '0013a20040a099a1'
 }).then(function (response) {
