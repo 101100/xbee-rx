@@ -19,7 +19,9 @@ var xbee = xbeePromise({
     serialportOptions: {
         baudrate: 57600
     },
-    debug: true
+    module: "ZigBee",
+    // turn on debugging to see what the library is doing
+    debug: false
 });
 
 var destinationId = process.argv && process.argv[2];
