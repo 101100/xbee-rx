@@ -4,7 +4,7 @@
  * test/mock-serialport.js
  * https://github.com/101100/xbee-promise
  *
- * Mock serial port used to test xbee-promise library.
+ * Mock serialport used to test xbee-promise library.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -29,6 +29,8 @@ var mockdata = {
 };
 
 function MockSerialPort(path, options) {
+    this.paused = false;
+
     mockdata.path = path;
     mockdata.options = options;
     mockdata.opened = true;
