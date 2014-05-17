@@ -60,6 +60,28 @@ describe('xbee-promise', function () {
 
                 });
 
+                it("fails with invalid 'command' options parameter", function () {
+
+                    var badSettings = [
+                            {
+                                command: "TOO LONG"
+                            },
+                            {
+                                command: [ 0x67, 0x69 ],
+                                test: "fail!"
+                            },
+                            {
+                                command: {},
+                                other: "stuff"
+                            }
+                        ];
+
+                    badSettings.forEach(function (settings) {
+                        callRemoteCommand(settings).should.throw(/'command'.*must be a string/);
+                    });
+
+                });
+
                 it("fails with missing 'command' options parameter", function () {
 
                     var badSettings = [

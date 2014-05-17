@@ -82,6 +82,31 @@ describe('xbee-promise', function () {
 
                 });
 
+                it("fails with invalid 'command' options parameter", function () {
+
+                    var badSettings = [
+                            {
+                                command: "TOO LONG",
+                                destination16: "0102"
+                            },
+                            {
+                                command: [ 0x67, 0x69 ],
+                                destination64: "0102030405060708",
+                                test: "fail!"
+                            },
+                            {
+                                command: {},
+                                destinationId: "NODE",
+                                other: "stuff"
+                            }
+                        ];
+
+                    badSettings.forEach(function (settings) {
+                        callRemoteCommand(settings).should.throw(/'command'.*must be a string/);
+                    });
+
+                });
+
                 it("fails with no destination options parameter", function () {
 
                     var badSettings = [
