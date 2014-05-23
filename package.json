@@ -1,9 +1,9 @@
 {
     "name": "xbee-promise",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "homepage": "https://github.com/101100/xbee-promise",
     "description": "Promise-based library for XBee wireless modules based on xbee-api",
-    "keywords": [ "xbee", "zigbee", "script", "promise", "serialport" ],
+    "keywords": [ "xbee", "zigbee", "802.15.4", "script", "promise", "serialport" ],
     "author": {
         "name": "Jason Heard",
         "email": "jasonpheard@gmail.com"
@@ -28,6 +28,19 @@
         "q": "~1.0",
         "serialport": ">= 1.4.0",
         "xbee-api": ">= 0.3.5"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.4",
+        "grunt-cli": "~0.1.13",
+        "grunt-jslint": "~1.1.8",
+        "grunt-simple-mocha": "~0.4.0",
+        "grunt-contrib-watch": "~0.6.1",
+        "proxyquire": "~0.6.0",
+        "should": "~3.3.1"
+    },
+    "scripts": {
+        "test": "grunt test",
+        "watch": "grunt watch"
     }
 }
 

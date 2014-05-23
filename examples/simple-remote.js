@@ -1,7 +1,7 @@
 /*jslint node:true */
 
 /*
- * simple-remote.js
+ * examples/simple-remote.js
  * https://github.com/101100/xbee-promise
  *
  * Simple example showing the use of remoteCommand and the returned promise.
@@ -19,7 +19,9 @@ var xbee = xbeePromise({
     serialportOptions: {
         baudrate: 57600
     },
-    debug: true
+    module: "ZigBee",
+    // turn on debugging to see what the library is doing
+    debug: false
 });
 
 var destinationId = process.argv && process.argv[2];

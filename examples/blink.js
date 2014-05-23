@@ -1,7 +1,7 @@
 /*jslint node:true */
 
 /*
- * blink.js
+ * examples/blink.js
  * https://github.com/101100/xbee-promise
  *
  * Example that blinks a LED on AD1 on a remote module
@@ -19,6 +19,7 @@ var xbee = xbeePromise({
     serialportOptions: {
         baudrate: 57600
     },
+    module: "ZigBee",
     // turn on debugging to see what the library is doing
     debug: false
 });

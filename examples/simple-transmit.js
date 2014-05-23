@@ -1,7 +1,7 @@
 /*jslint node:true */
 
 /*
- * simple-transmit.js
+ * examples/simple-transmit.js
  * https://github.com/101100/xbee-promise
  *
  * Simple example showing the use of remoteTransmit and the returned promise.
@@ -19,6 +19,7 @@ var xbee = xbeePromise({
     serialportOptions: {
         baudrate: 57600
     },
+    module: "ZigBee",
     // turn on debugging to see what the library is doing
     debug: false
 });
