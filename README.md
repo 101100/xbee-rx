@@ -2,6 +2,7 @@
 #### An XBee promise-based API
 
 [![NPM version](https://badge.fury.io/js/xbee-promise.svg)](http://badge.fury.io/js/xbee-promise)
+[![Travis CI Build Status](https://api.travis-ci.org/101100/xbee-promise.svg)](https://travis-ci.org/101100/xbee-promise)
 
 The [xbee-promise](http://github.com/101100/xbee-promise/) [Node.js](http://nodejs.org/)
 module wraps the [xbee-api](http://github.com/jouz/xbee-api/) module with a promise-based
