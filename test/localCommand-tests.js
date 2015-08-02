@@ -128,7 +128,11 @@ describe('xbee-rx', function () {
 
                         commandResultStream = xbee.localCommand({
                             command: command
-                        });
+                        }).publishLast();
+
+                        // connect to the command stream so that it will send
+                        // packets immediately
+                        commandResultStream.connect();
 
                     });
 

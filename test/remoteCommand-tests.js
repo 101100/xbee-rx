@@ -295,7 +295,11 @@ describe('xbee-rx', function () {
                         commandResultStream = xbee.remoteCommand({
                             destination64: destination64,
                             command: command
-                        });
+                        }).publishLast();
+
+                        // connect to the command stream so that it will send
+                        // packets immediately
+                        commandResultStream.connect();
 
                     });
 
@@ -481,7 +485,11 @@ describe('xbee-rx', function () {
                             destination16: destination16,
                             command: command,
                             commandParameter: commandParameter
-                        });
+                        }).publishLast();
+
+                        // connect to the command stream so that it will send
+                        // packets immediately
+                        commandResultStream.connect();
 
                     });
 
@@ -667,7 +675,11 @@ describe('xbee-rx', function () {
                             commandResultStream = xbee.remoteCommand({
                                 destinationId: destinationId,
                                 command: command
-                            });
+                            }).publishLast();
+
+                            // connect to the command stream so that it will send
+                            // packets immediately
+                            commandResultStream.connect();
 
                         });
 
@@ -868,10 +880,12 @@ describe('xbee-rx', function () {
 
                                 beforeEach(function () {
 
-                                    xbee.remoteCommand({
+                                    var secondCommandStream = xbee.remoteCommand({
                                         destinationId: destinationId,
                                         command: command2
-                                    });
+                                    }).publishLast();
+
+                                    secondCommandStream.connect();
 
                                 });
 
@@ -896,10 +910,12 @@ describe('xbee-rx', function () {
 
                                 beforeEach(function () {
 
-                                    xbee.remoteCommand({
+                                    var secondCommandStream = xbee.remoteCommand({
                                         destinationId: destinationId2,
                                         command: command
-                                    });
+                                    }).publishLast();
+
+                                    secondCommandStream.connect();
 
                                 });
 
