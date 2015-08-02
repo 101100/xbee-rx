@@ -1,24 +1,25 @@
-# xbee-promise
-#### An XBee promise-based API
+# xbee-rx
+#### An XBee Reactive Extensions API
 
-[![NPM version](https://badge.fury.io/js/xbee-promise.svg)](http://badge.fury.io/js/xbee-promise)
-[![Travis CI Build Status](https://api.travis-ci.org/101100/xbee-promise.svg)](https://travis-ci.org/101100/xbee-promise)
+[![NPM version](https://badge.fury.io/js/xbee-rx.svg)](http://badge.fury.io/js/xbee-rx)
+[![Travis CI Build Status](https://api.travis-ci.org/101100/xbee-rx.svg)](https://travis-ci.org/101100/xbee-rx)
 
-The [xbee-promise](http://github.com/101100/xbee-promise/) [Node.js](http://nodejs.org/)
-module wraps the [xbee-api](http://github.com/jouz/xbee-api/) module with a promise-based
+The [xbee-rx](http://github.com/101100/xbee-rx/) [Node.js](http://nodejs.org/)
+module wraps the [xbee-api](http://github.com/jouz/xbee-api/) module with a [reactive
+extensions](https://github.com/Reactive-Extensions/RxJS)
 API for [ZigBee](http://en.wikipedia.org/wiki/ZigBee) modules.  It may work with older
 [802.15.4](http://en.wikipedia.org/wiki/IEEE_802.15.4) modules, but it has not been
 tested with them.  Currently it facilitates local commands, remote commands, and remote
 transmissions.  For remote commands and transmissions, either a address or node ID may be
-provided, with automatic lookup and aching done for the node ID.
+provided, with automatic lookup and caching done for the node ID.
 
-xbee-promise relies on
+xbee-rx relies on
 [serialport](https://github.com/voodootikigod/node-serialport) for serial communications.
 
 ## Usage
 
-First, you will need to install the `xbee-promise` module (i.e.
-`npm install xbee-promise`).
+First, you will need to install the `xbee-rx` module (i.e.
+`npm install xbee-rx`).
 
 ### Initialization
 
@@ -28,12 +29,12 @@ a number.  On unix and OS X machines, this will typically be `/dev/tty???`, wher
 `???` can be anything from `USB0` to `.usbserial-A4013E5P`. In addition, you will
 need to make sure that the module connected to your machine is in API mode and that
 you know the baudrate it is set to.  By default, the baudrate is 57600 when API
-mode is used.  In addition, you will need to know if you are using a ZigBee module, a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this library works between the ZigBee and ZNet modules.  Older series 2 modules have ZNet firmware and can typically be upgraded to ZigBee firmware.)  Once these details are known, you can initialize xbee-promise:
+mode is used.  In addition, you will need to know if you are using a ZigBee module, a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this library works between the ZigBee and ZNet modules.  Older series 2 modules have ZNet firmware and can typically be upgraded to ZigBee firmware.)  Once these details are known, you can initialize xbee-rx:
 
 ```javascript
-var xbeePromise = require('xbee-promise');
+var xbeeRx = require('xbee-rx');
 
-var xbee = xbeePromise({
+var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
     serialPortOptions: {
         baudrate: 57600
@@ -45,7 +46,7 @@ var xbee = xbeePromise({
 Note: if you are using API mode 2, you must specify that with the `api_mode` parameter
 (`api_mode: 2`).  You can give any options
 [known by serialport](https://github.com/voodootikigod/node-serialport#to-use) inside
-`serialportOptions` (other than `parser` as it is used and set by xbee-promise).  To see
+`serialportOptions` (other than `parser` as it is used and set by xbee-rx).  To see
 what the library is doing (during lookups, etc), you can add the debug flag
 (`debug: true`).  Finally, you can set the default timeout for all commands with
 `defaultTimeout`.  The default is 5000 milliseconds.
@@ -60,14 +61,14 @@ xbee.localCommand({
     // ATMY
     // get my 16 bit address
     command: "MY"
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be an array of two bytes, e.g. [ 23, 167 ]
     console.log("ATMY response:\n", response);
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
-});
+})
 ```
 
 
@@ -77,12 +78,12 @@ xbee.localCommand({
     // turn digital output 1 on
     command: "D1",
     commandParameter: [ 5 ]
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be [ 0 ] from the response frame
     console.log("Success!");
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
 });
 ```
@@ -101,12 +102,12 @@ xbee.remoteCommand({
     command: "D0",
     // this ID must be set on the target node with ATNI
     destinationId: "FUNNODE"
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be a single value in an array, e.g. [ 1 ]
     console.log("ATD0 response from FUNNODE:\n", response);
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
 });
 ```
@@ -119,12 +120,12 @@ xbee.remoteCommand({
     command: "D3",
     // destination addresses can be in hexidecimal or byte arrays
     destination16: [ 0xa9, 0x78 ]
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be a single value in an array, e.g. [ 1 ]
     console.log("ATD3 response from FUNNODE:\n", response);
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
 });
 ```
@@ -139,12 +140,12 @@ xbee.remoteCommand({
     // destination addresses can be in hexidecimal or byte arrays
     // serial number from the bottom of the module (or combination of ATSH and ATSL)
     destination64: '0013a20040a099a1'
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be [ 0 ] from the response frame
     console.log("Success!");
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
 });
 ```
@@ -160,22 +161,23 @@ xbee.remoteTransmit({
     // this ID must be set on the target node with ATNI
     destinationId: "FUNNODE",
     data: "I'm sending you text, FUNNODE!"
-}).then(function (response) {
+}).subscribe(function (response) {
     // response will be true for a successful transmision
     console.log("Text sent to FUNNODE!");
-}).catch(function (e) {
+}, function (e) {
     console.log("Command failed:\n", e);
-}).fin(function () {
+}, function () {
     xbee.close();
 });
 ```
 
 Some more examples can be found in
-[the repository](https://github.com/101100/xbee-promise/tree/master/examples).
+[the repository](https://github.com/101100/xbee-rx/tree/master/examples).
 
-## Planned future work
+## Possible future work
 
-Future planned expansion of this module include:
+Future possible expansion of this module include:
+- Adding stream of incoming transmissions
 - Adding command line tool to perform all three types of commands (for testing, etc).
 - Translating inputs and outputs of commands logically.  E.g. ATNI command should
   return a string, not an array of character codes, ATD1 (and friends) should accept
