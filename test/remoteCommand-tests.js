@@ -3,9 +3,9 @@
 
 /*
  * test/remoteCommand-tests.js
- * https://github.com/101100/xbee-promise
+ * https://github.com/101100/xbee-rx
  *
- * Tests for the xbee-promise library remoteCommand function.
+ * Tests for the xbee-rx library remoteCommand function.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -15,18 +15,17 @@
 
 var assert = require("assert");
 var should = require("should");
-var Q = require("q");
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
-var xbeePromise = proxyquire("../lib/xbee-promise.js", {
+var xbeeRx = proxyquire("../lib/xbee-rx.js", {
     'serialport': mockserialport,
     'xbee-api': mockXbeeApi
 });
 
-describe('xbee-promise', function () {
+describe('xbee-rx', function () {
 
     [ "802.15.4", "ZNet", "ZigBee" ].forEach(function (module) {
 
@@ -37,7 +36,7 @@ describe('xbee-promise', function () {
                 var xbee;
 
                 beforeEach(function () {
-                    xbee = xbeePromise({
+                    xbee = xbeeRx({
                         serialport: "serialport path",
                         module: module,
                         defaultTimeoutMs: 100
@@ -289,20 +288,21 @@ describe('xbee-promise', function () {
 
                     var command = "MY",
                         destination64 = "0102030405060708",
-                        commandPromise;
+                        commandResultStream;
 
                     beforeEach(function () {
 
-                        commandPromise = xbee.remoteCommand({
+                        commandResultStream = xbee.remoteCommand({
                             destination64: destination64,
                             command: command
                         });
 
                     });
 
-                    it("returns a promise", function () {
+                    it("returns an Rx stream", function () {
 
-                        Q.isPromise(commandPromise).should.equal(true);
+                        //Q.isPromise(commandResultStream).should.equal(true);
+                        return; // TODO
 
                     });
 
@@ -332,14 +332,16 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("resolves promise with 'commandData'", function (done) {
+                        it("emits 'commandData'", function (done) {
 
-                            commandPromise.then(function (result) {
-                                result.should.eql([ 42, 16 ]);
-                                done();
-                            }).catch(function (result) {
-                                throw result;
-                            }).done();
+                            commandResultStream
+                                .subscribe(function (result) {
+                                    result.should.eql([ 42, 16 ]);
+                                }, function () {
+                                    assert.fail("Stream ended with error");
+                                }, function () {
+                                    done();
+                                });
 
                         });
 
@@ -358,7 +360,7 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
+                        it("does not emit data, complete or error", function (done) {
 
                             var areDone = false;
 
@@ -367,13 +369,16 @@ describe('xbee-promise', function () {
                                 done();
                             }, 50);
 
-                            commandPromise.then(function () {
-                                assert.fail("Promise was resolved");
-                            }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function () {
+                                    if (!areDone) {
+                                        assert.fail("Stream ended with error early");
+                                    }
+                                }, function () {
+                                    assert.fail("Stream completed");
+                                });
 
                         });
 
@@ -392,7 +397,7 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
+                        it("does not emit data, complete or error", function (done) {
 
                             var areDone = false;
 
@@ -401,13 +406,16 @@ describe('xbee-promise', function () {
                                 done();
                             }, 50);
 
-                            commandPromise.then(function () {
-                                assert.fail("Promise was resolved");
-                            }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function () {
+                                    if (!areDone) {
+                                        assert.fail("Stream ended with error early");
+                                    }
+                                }, function () {
+                                    assert.fail("Stream completed");
+                                });
 
                         });
 
@@ -426,13 +434,16 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("rejects promise with Error", function (done) {
+                        it("ends stream with error", function (done) {
 
-                            commandPromise.catch(function (result) {
-                                result.should.be.instanceof(Error);
-                                result.message.should.be.type("string");
-                                done();
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function (result) {
+                                    result.should.be.instanceof(Error);
+                                    result.message.should.be.type("string");
+                                    done();
+                                });
 
                         });
 
@@ -440,13 +451,16 @@ describe('xbee-promise', function () {
 
                     describe("with no response frame", function () {
 
-                        it("rejects promise with Error", function (done) {
+                        it("ends stream with error", function (done) {
 
-                            commandPromise.catch(function (result) {
-                                result.should.be.instanceof(Error);
-                                result.message.should.match(/Timed out after 100 ms/);
-                                done();
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function (result) {
+                                    result.should.be.instanceof(Error);
+                                    result.message.should.match(/Timed out after 100 ms/);
+                                    done();
+                                });
 
                         });
 
@@ -459,11 +473,11 @@ describe('xbee-promise', function () {
                     var command = "NI",
                         destination16 = [ 1, 2 ],
                         commandParameter = "NODELY",
-                        commandPromise;
+                        commandResultStream;
 
                     beforeEach(function () {
 
-                        commandPromise = xbee.remoteCommand({
+                        commandResultStream = xbee.remoteCommand({
                             destination16: destination16,
                             command: command,
                             commandParameter: commandParameter
@@ -471,9 +485,10 @@ describe('xbee-promise', function () {
 
                     });
 
-                    it("returns a promise", function () {
+                    it("returns an Rx stream", function () {
 
-                        Q.isPromise(commandPromise).should.equal(true);
+                        //Q.isPromise(commandResultStream).should.equal(true);
+                        return; // TODO
 
                     });
 
@@ -503,14 +518,16 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("resolves promise with 'commandData'", function (done) {
+                        it("emits 'commandData'", function (done) {
 
-                            commandPromise.then(function (result) {
-                                result.should.eql([]);
-                                done();
-                            }).catch(function (result) {
-                                throw result;
-                            }).done();
+                            commandResultStream
+                                .subscribe(function (result) {
+                                    result.should.eql([]);
+                                }, function () {
+                                    assert.fail("Stream ended with error");
+                                }, function () {
+                                    done();
+                                });
 
                         });
 
@@ -529,7 +546,7 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
+                        it("does not emit data, complete or error", function (done) {
 
                             var areDone = false;
 
@@ -538,13 +555,16 @@ describe('xbee-promise', function () {
                                 done();
                             }, 50);
 
-                            commandPromise.then(function () {
-                                assert.fail("Promise was resolved");
-                            }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function () {
+                                    if (!areDone) {
+                                        assert.fail("Stream ended with error early");
+                                    }
+                                }, function () {
+                                    assert.fail("Stream completed");
+                                });
 
                         });
 
@@ -563,7 +583,7 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
+                        it("does not emit data, complete or error", function (done) {
 
                             var areDone = false;
 
@@ -572,13 +592,16 @@ describe('xbee-promise', function () {
                                 done();
                             }, 50);
 
-                            commandPromise.then(function () {
-                                assert.fail("Promise was resolved");
-                            }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function () {
+                                    if (!areDone) {
+                                        assert.fail("Stream ended with error early");
+                                    }
+                                }, function () {
+                                    assert.fail("Stream completed");
+                                });
 
                         });
 
@@ -597,13 +620,16 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("rejects promise with Error", function (done) {
+                        it("ends stream with error", function (done) {
 
-                            commandPromise.catch(function (result) {
-                                result.should.be.instanceof(Error);
-                                result.message.should.be.type("string");
-                                done();
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function (result) {
+                                    result.should.be.instanceof(Error);
+                                    result.message.should.be.type("string");
+                                    done();
+                                });
 
                         });
 
@@ -611,13 +637,16 @@ describe('xbee-promise', function () {
 
                     describe("with no response frame", function () {
 
-                        it("rejects promise with Error", function (done) {
+                        it("ends stream with error", function (done) {
 
-                            commandPromise.catch(function (result) {
-                                result.should.be.instanceof(Error);
-                                result.message.should.match(/Timed out after 100 ms/);
-                                done();
-                            }).done();
+                            commandResultStream
+                                .subscribe(function () {
+                                    assert.fail("Stream contained data");
+                                }, function (result) {
+                                    result.should.be.instanceof(Error);
+                                    result.message.should.match(/Timed out after 100 ms/);
+                                    done();
+                                });
 
                         });
 
@@ -631,20 +660,21 @@ describe('xbee-promise', function () {
 
                         var command = "SH",
                             destinationId = "TESTNODE",
-                            commandPromise;
+                            commandResultStream;
 
                         beforeEach(function () {
 
-                            commandPromise = xbee.remoteCommand({
+                            commandResultStream = xbee.remoteCommand({
                                 destinationId: destinationId,
                                 command: command
                             });
 
                         });
 
-                        it("returns a promise", function () {
+                        it("returns an Rx stream", function () {
 
-                            Q.isPromise(commandPromise).should.equal(true);
+                            //Q.isPromise(commandResultStream).should.equal(true);
+                            return; // TODO
 
                         });
 
@@ -672,21 +702,16 @@ describe('xbee-promise', function () {
 
                             });
 
-                            it("sends remote command frame", function (done) {
+                            it("sends remote command frame", function () {
 
-                                // need delay due to use of async then in library
-                                setImmediate(function () {
-                                    mockserialport.lastWrite.should.be.type('object');
-                                    mockserialport.lastWrite.should.have.property('built', true);
-                                    mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
-                                    mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                    mockserialport.lastWrite.should.have.property('command', command);
-                                    mockserialport.lastWrite.should.have.property('commandParameter', []);
-                                    mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                    mockserialport.lastWrite.should.have.property('destination16', undefined);
-
-                                    done();
-                                });
+                                mockserialport.lastWrite.should.be.type('object');
+                                mockserialport.lastWrite.should.have.property('built', true);
+                                mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                                mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
+                                mockserialport.lastWrite.should.have.property('command', command);
+                                mockserialport.lastWrite.should.have.property('commandParameter', []);
+                                mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
+                                mockserialport.lastWrite.should.have.property('destination16', undefined);
 
                             });
 
@@ -703,14 +728,16 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("resolves promise with 'commandData'", function (done) {
+                                it("emits 'commandData'", function (done) {
 
-                                    commandPromise.then(function (result) {
-                                        result.should.eql([ 1, 2, 3, 4 ]);
-                                        done();
-                                    }).catch(function (result) {
-                                        throw result;
-                                    }).done();
+                                    commandResultStream
+                                        .subscribe(function (result) {
+                                            result.should.eql([ 1, 2, 3, 4 ]);
+                                        }, function () {
+                                            assert.fail("Stream ended with error");
+                                        }, function () {
+                                            done();
+                                        });
 
                                 });
 
@@ -729,7 +756,7 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("does not resolve or reject promise", function (done) {
+                                it("does not emit data, complete or error", function (done) {
 
                                     var areDone = false;
 
@@ -738,13 +765,16 @@ describe('xbee-promise', function () {
                                         done();
                                     }, 50);
 
-                                    commandPromise.then(function () {
-                                        assert.fail("Promise was resolved");
-                                    }).catch(function () {
-                                        if (!areDone) {
-                                            assert.fail("Promise was rejected early");
-                                        }
-                                    }).done();
+                                    commandResultStream
+                                        .subscribe(function () {
+                                            assert.fail("Stream contained data");
+                                        }, function () {
+                                            if (!areDone) {
+                                                assert.fail("Stream ended with error early");
+                                            }
+                                        }, function () {
+                                            assert.fail("Stream completed");
+                                        });
 
                                 });
 
@@ -763,7 +793,7 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("does not resolve or reject promise", function (done) {
+                                it("does not emit data, complete or error", function (done) {
 
                                     var areDone = false;
 
@@ -772,13 +802,16 @@ describe('xbee-promise', function () {
                                         done();
                                     }, 50);
 
-                                    commandPromise.then(function () {
-                                        assert.fail("Promise was resolved");
-                                    }).catch(function () {
-                                        if (!areDone) {
-                                            assert.fail("Promise was rejected early");
-                                        }
-                                    }).done();
+                                    commandResultStream
+                                        .subscribe(function () {
+                                            assert.fail("Stream contained data");
+                                        }, function () {
+                                            if (!areDone) {
+                                                assert.fail("Stream ended with error early");
+                                            }
+                                        }, function () {
+                                            assert.fail("Stream completed");
+                                        });
 
                                 });
 
@@ -797,13 +830,16 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("rejects promise with Error", function (done) {
+                                it("ends stream with error", function (done) {
 
-                                    commandPromise.catch(function (result) {
-                                        result.should.be.instanceof(Error);
-                                        result.message.should.be.type("string");
-                                        done();
-                                    }).done();
+                                    commandResultStream
+                                        .subscribe(function () {
+                                            assert.fail("Stream contained data");
+                                        }, function (result) {
+                                            result.should.be.instanceof(Error);
+                                            result.message.should.be.type("string");
+                                            done();
+                                        });
 
                                 });
 
@@ -811,13 +847,16 @@ describe('xbee-promise', function () {
 
                             describe("with no remote command response frame", function () {
 
-                                it("rejects promise with Error", function (done) {
+                                it("ends stream with error", function (done) {
 
-                                    commandPromise.catch(function (result) {
-                                        result.should.be.instanceof(Error);
-                                        result.message.should.match(/Timed out after 100 ms/);
-                                        done();
-                                    }).done();
+                                    commandResultStream
+                                        .subscribe(function () {
+                                            assert.fail("Stream contained data");
+                                        }, function (result) {
+                                            result.should.be.instanceof(Error);
+                                            result.message.should.match(/Timed out after 100 ms/);
+                                            done();
+                                        });
 
                                 });
 
@@ -836,21 +875,16 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("sends remote command frame", function (done) {
+                                it("sends remote command frame", function () {
 
-                                    // need delay due to use of async then in library
-                                    setImmediate(function () {
-                                        mockserialport.lastWrite.should.be.type('object');
-                                        mockserialport.lastWrite.should.have.property('built', true);
-                                        mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
-                                        mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                        mockserialport.lastWrite.should.have.property('command', command2);
-                                        mockserialport.lastWrite.should.have.property('commandParameter', []);
-                                        mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                        mockserialport.lastWrite.should.have.property('destination16', undefined);
-
-                                        done();
-                                    });
+                                    mockserialport.lastWrite.should.be.type('object');
+                                    mockserialport.lastWrite.should.have.property('built', true);
+                                    mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                                    mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
+                                    mockserialport.lastWrite.should.have.property('command', command2);
+                                    mockserialport.lastWrite.should.have.property('commandParameter', []);
+                                    mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
+                                    mockserialport.lastWrite.should.have.property('destination16', undefined);
 
                                 });
 
@@ -869,19 +903,14 @@ describe('xbee-promise', function () {
 
                                 });
 
-                                it("sends lookup frame", function (done) {
+                                it("sends lookup frame", function () {
 
-                                    // need delay due to use of async then in library
-                                    setImmediate(function () {
-                                        mockserialport.lastWrite.should.be.type('object');
-                                        mockserialport.lastWrite.should.have.property('built', true);
-                                        mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                                        mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                        mockserialport.lastWrite.should.have.property('command', "DN");
-                                        mockserialport.lastWrite.should.have.property('commandParameter', destinationId2);
-
-                                        done();
-                                    });
+                                    mockserialport.lastWrite.should.be.type('object');
+                                    mockserialport.lastWrite.should.have.property('built', true);
+                                    mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                                    mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
+                                    mockserialport.lastWrite.should.have.property('command', "DN");
+                                    mockserialport.lastWrite.should.have.property('commandParameter', destinationId2);
 
                                 });
 
@@ -902,7 +931,7 @@ describe('xbee-promise', function () {
 
                             });
 
-                            it("does not resolve or reject promise", function (done) {
+                            it("does not emit data, complete or error", function (done) {
 
                                 var areDone = false;
 
@@ -911,13 +940,16 @@ describe('xbee-promise', function () {
                                     done();
                                 }, 50);
 
-                                commandPromise.then(function () {
-                                    assert.fail("Promise was resolved");
-                                }).catch(function () {
-                                    if (!areDone) {
-                                        assert.fail("Promise was rejected early");
-                                    }
-                                }).done();
+                                commandResultStream
+                                    .subscribe(function () {
+                                        assert.fail("Stream contained data");
+                                    }, function () {
+                                        if (!areDone) {
+                                            assert.fail("Stream ended with error early");
+                                        }
+                                    }, function () {
+                                        assert.fail("Stream completed");
+                                    });
 
                             });
 
@@ -936,7 +968,7 @@ describe('xbee-promise', function () {
 
                             });
 
-                            it("does not resolve or reject promise", function (done) {
+                            it("does not emit data, complete or error", function (done) {
 
                                 var areDone = false;
 
@@ -945,13 +977,16 @@ describe('xbee-promise', function () {
                                     done();
                                 }, 50);
 
-                                commandPromise.then(function () {
-                                    assert.fail("Promise was resolved");
-                                }).catch(function () {
-                                    if (!areDone) {
-                                        assert.fail("Promise was rejected early");
-                                    }
-                                }).done();
+                                commandResultStream
+                                    .subscribe(function () {
+                                        assert.fail("Stream contained data");
+                                    }, function () {
+                                        if (!areDone) {
+                                            assert.fail("Stream ended with error early");
+                                        }
+                                    }, function () {
+                                        assert.fail("Stream completed");
+                                    });
 
                             });
 
@@ -970,13 +1005,16 @@ describe('xbee-promise', function () {
 
                             });
 
-                            it("rejects promise with 'not found' Error", function (done) {
+                            it("ends stream with 'not found' error", function (done) {
 
-                                commandPromise.catch(function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.equal("Node not found");
-                                    done();
-                                }).done();
+                                commandResultStream
+                                    .subscribe(function () {
+                                        assert.fail("Stream contained data");
+                                    }, function (result) {
+                                        result.should.be.instanceof(Error);
+                                        result.message.should.equal("Node not found");
+                                        done();
+                                    });
 
                             });
 
@@ -984,13 +1022,16 @@ describe('xbee-promise', function () {
 
                         describe("with no lookup response frame", function () {
 
-                            it("rejects promise with 'not found' Error", function (done) {
+                            it("ends stream with 'not found' error", function (done) {
 
-                                commandPromise.catch(function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.equal("Node not found");
-                                    done();
-                                }).done();
+                                commandResultStream
+                                    .subscribe(function () {
+                                        assert.fail("Stream contained data");
+                                    }, function (result) {
+                                        result.should.be.instanceof(Error);
+                                        result.message.should.equal("Node not found");
+                                        done();
+                                    });
 
                             });
 

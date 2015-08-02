@@ -3,9 +3,9 @@
 
 /*
  * test/close-tests.js
- * https://github.com/101100/xbee-promise
+ * https://github.com/101100/xbee-rx
  *
- * Tests for the xbee-promise library close function.
+ * Tests for the xbee-rx library close function.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -19,7 +19,7 @@ var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
-var xbeePromise = proxyquire("../lib/xbee-promise.js", {
+var xbeeRx = proxyquire("../lib/xbee-rx.js", {
     'serialport': mockserialport,
     'xbee-api': mockXbeeApi
 });
@@ -31,7 +31,7 @@ describe('xbee-promise', function () {
         var xbee;
 
         beforeEach(function () {
-            xbee = xbeePromise({
+            xbee = xbeeRx({
                 serialport: "serialport path",
                 module: "ZigBee"
             });
