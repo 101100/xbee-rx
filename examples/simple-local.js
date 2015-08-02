@@ -42,11 +42,11 @@ xbee
         command: command,
         commandParameter: commandParameter
     })
-    .finally(function () {
-        xbee.close();
-    })
     .subscribe(function (f) {
         console.log("Command successful:\n", f);
     }, function (e) {
         console.log("Command failed:\n", e);
+        xbee.close();
+    }, function () {
+        xbee.close();
     });

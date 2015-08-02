@@ -38,14 +38,14 @@ xbee
         destinationId: destinationId,
         data: data
     })
-    .finally(function () {
-        xbee.close();
-    })
     .subscribe(function () {
         // 'true' is returned for a successful transmission, so no need to print it.
         console.log("Transmission successful");
     }, function (e) {
         console.log("Transmission failed:\n", e);
+        xbee.close();
+    }, function () {
+        xbee.close();
     });
 
 

@@ -66,6 +66,7 @@ xbee.localCommand({
     console.log("ATMY response:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 })
@@ -83,6 +84,7 @@ xbee.localCommand({
     console.log("Success!");
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 });
@@ -107,6 +109,7 @@ xbee.remoteCommand({
     console.log("ATD0 response from FUNNODE:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 });
@@ -125,6 +128,7 @@ xbee.remoteCommand({
     console.log("ATD3 response from FUNNODE:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 });
@@ -145,6 +149,7 @@ xbee.remoteCommand({
     console.log("Success!");
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 });
@@ -166,6 +171,7 @@ xbee.remoteTransmit({
     console.log("Text sent to FUNNODE!");
 }, function (e) {
     console.log("Command failed:\n", e);
+    xbee.close();
 }, function () {
     xbee.close();
 });
