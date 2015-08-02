@@ -2,7 +2,7 @@
 
 /*
  * examples/blink.js
- * https://github.com/101100/xbee-promise
+ * https://github.com/101100/xbee-rx
  *
  * Example that blinks a LED on AD1 on a remote module
  *
@@ -12,9 +12,12 @@
 
 "use strict";
 
-var xbeePromise = require('../lib/xbee-promise.js');
+var xbeeRx = require('../lib/xbee-rx.js');
+var rx = require("rx");
+var R = require("ramda");
 
-var xbee = xbeePromise({
+
+var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
     serialportOptions: {
         baudrate: 57600
@@ -24,29 +27,48 @@ var xbee = xbeePromise({
     debug: false
 });
 
-var onNext = true;
 var nodeId = "TEMP3";
 
 console.log('Blinking LED on AD1 on module with ID: ', nodeId);
 
-function toggleLed() {
-    process.stdout.write("Turning LED " + (onNext ? "ON." : "OFF") + "...");
+// monitor CTRL-C to close serial connection
+var stdin = process.stdin;
+stdin.setRawMode(true);
+var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
+    .where(function monitorCtrlCOnData(data) {
+        return data.length === 1 && data[0] === 0x03; // Ctrl+C
+    })
+    .take(1);
 
-    xbee.remoteCommand({
-        command: "D1",
-        commandParameter: [ onNext ? 5 : 4 ],
-        destinationId: nodeId
-    }).then(function toggleSuccess() {
-        console.log(" success.");
-        onNext = !onNext;
+// stream that produces alternating true/false every 2 seconds
+// (starting immediately)
+var alternatingTrueFalse = rx.Observable.timer(0, 2000)
+    .map(R.modulo(R.__, 2))
+    .map(R.eq(0));
 
-        // schedule next toggle in 2 seconds
-        setTimeout(toggleLed, 2000);
-    }).catch(function toggleFailure(e) {
-        console.log(" command failed:\n", e);
-        xbee.close();
-    });
-}
+alternatingTrueFalse
+    .takeUntil(ctrlCStream)
+    .flatMap(function (onNext) {
+        process.stdout.write("Turning LED " + (onNext ? "ON." : "OFF") + "...");
 
-// do initial toggle
-setImmediate(toggleLed);
+        return xbee.remoteCommand({
+            command: "D1",
+            commandParameter: [ onNext ? 5 : 4 ],
+            destinationId: nodeId
+        });
+    })
+    .subscribe(
+        function () {
+            console.log(" success.");
+        },
+        function (err) {
+            console.log(" command failed:\n", err);
+            xbee.close();
+            process.exit();
+        },
+        function () {
+            console.log("All done!");
+            xbee.close();
+            process.exit();
+        }
+    );

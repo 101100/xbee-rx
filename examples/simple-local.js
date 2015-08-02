@@ -2,9 +2,9 @@
 
 /*
  * examples/simple-local.js
- * https://github.com/101100/xbee-promise
+ * https://github.com/101100/xbee-rx
  *
- * Simple example showing the use of localCommand and the returned promise.
+ * Simple example showing the use of localCommand and the returned RX stream.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -12,9 +12,9 @@
 
 "use strict";
 
-var xbeePromise = require('../lib/xbee-promise.js');
+var xbeeRx = require('../lib/xbee-rx.js');
 
-var xbee = xbeePromise({
+var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
     serialportOptions: {
         baudrate: 57600
@@ -37,13 +37,16 @@ if (typeof commandParameter === "string" && !isNaN(parseInt(commandParameter, 10
     commandParameter = [ parseInt(commandParameter, 10) ];
 }
 
-xbee.localCommand({
-    command: command,
-    commandParameter: commandParameter
-}).then(function (f) {
-    console.log("Command successful:\n", f);
-}).catch(function (e) {
-    console.log("Command failed:\n", e);
-}).fin(function () {
-    xbee.close();
-});
+xbee
+    .localCommand({
+        command: command,
+        commandParameter: commandParameter
+    })
+    .finally(function () {
+        xbee.close();
+    })
+    .subscribe(function (f) {
+        console.log("Command successful:\n", f);
+    }, function (e) {
+        console.log("Command failed:\n", e);
+    });

@@ -2,9 +2,9 @@
 
 /*
  * examples/simple-transmit.js
- * https://github.com/101100/xbee-promise
+ * https://github.com/101100/xbee-rx
  *
- * Simple example showing the use of remoteTransmit and the returned promise.
+ * Simple example showing the use of remoteTransmit and the returned RX stream.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -12,9 +12,9 @@
 
 "use strict";
 
-var xbeePromise = require('../lib/xbee-promise.js');
+var xbeeRx = require('../lib/xbee-rx.js');
 
-var xbee = xbeePromise({
+var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
     serialportOptions: {
         baudrate: 57600
@@ -33,15 +33,19 @@ if (!data || process.argv[4]) {
     process.exit(1);
 }
 
-xbee.remoteTransmit({
-    destinationId: destinationId,
-    data: data
-}).then(function () {
-    // 'true' is returned for a successful transmission, so no need to print it.
-    console.log("Transmission successful");
-}).catch(function (e) {
-    console.log("Transmission failed:\n", e);
-}).fin(function () {
-    xbee.close();
-});
+xbee
+    .remoteTransmit({
+        destinationId: destinationId,
+        data: data
+    })
+    .finally(function () {
+        xbee.close();
+    })
+    .subscribe(function () {
+        // 'true' is returned for a successful transmission, so no need to print it.
+        console.log("Transmission successful");
+    }, function (e) {
+        console.log("Transmission failed:\n", e);
+    });
+
 
