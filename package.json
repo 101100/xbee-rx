@@ -24,20 +24,19 @@
         "node": ">= 0.10.0"
     },
     "dependencies": {
-        "parambulator": "^0.1",
-        "ramda": "0.15",
-        "rx": "^2.2",
-        "serialport": "^1.4",
+        "parambulator": "^1.5",
+        "rx": "^2.5",
+        "serialport": "^1.7",
         "xbee-api": "^0.3"
     },
     "devDependencies": {
-        "grunt": "~0.4.4",
-        "grunt-cli": "~0.1.13",
-        "grunt-jslint": "~1.1.8",
-        "grunt-simple-mocha": "~0.4.0",
-        "grunt-contrib-watch": "~0.6.1",
-        "proxyquire": "~0.6.0",
-        "should": "~3.3.1"
+        "grunt": "^0.4",
+        "grunt-cli": "^0.1",
+        "grunt-jslint": "^1.1",
+        "grunt-simple-mocha": "^0.4",
+        "grunt-contrib-watch": "^0.6",
+        "proxyquire": "^1.6",
+        "should": "^7.0"
     },
     "scripts": {
         "test": "grunt test",
