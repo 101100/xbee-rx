@@ -211,6 +211,32 @@ the `xbee-rx` module as well as the contained serialport connection.
 xbee.close();
 ```
 
+### A note about subscriptions
+
+All of the commands must be subcribed to before they will activate.  For example,
+the following code will have no effect.
+
+```javascript
+xbee.remoteTransmit({
+    // this ID must be set on the target node with ATNI
+    destinationId: "FUNNODE",
+    data: "I'm sending you text, FUNNODE!"
+});
+```
+
+Typically, you would want to subscribe to see if the command worked (was acknowledged
+by the XBee module), so that you could print an error or try again.  If you don't
+care about the result, you will still need to make a dummy subscription to trigger
+the command, as in the following code.
+
+```javascript
+xbee.remoteTransmit({
+    // this ID must be set on the target node with ATNI
+    destinationId: "FUNNODE",
+    data: "I'm sending you text, FUNNODE!"
+}).subscribe(); // ignore status/result packet
+```
+
 ### More examples
 
 Some more examples can be found in
