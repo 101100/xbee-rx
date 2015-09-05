@@ -36,6 +36,7 @@
         "grunt-jslint": "^1.1",
         "grunt-simple-mocha": "^0.4",
         "grunt-contrib-watch": "^0.6",
+        "moment": "^2.10",
         "proxyquire": "^1.6",
         "should": "^7.0"
     },
