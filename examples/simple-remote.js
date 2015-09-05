@@ -35,7 +35,12 @@ if (!destinationId || process.argv[5]) {
 }
 
 if (typeof commandParameter === "string" && !isNaN(parseInt(commandParameter, 10))) {
-    commandParameter = [ parseInt(commandParameter, 10) ];
+    var commandNumber = parseInt(commandParameter, 10);
+    if (commandNumber < 0xff) {
+        commandParameter = [ parseInt(commandParameter, 10) ];
+    } else {
+        commandParameter = [ (commandNumber >> 8) & 0xFF, commandNumber & 0xFF ];
+    }
 }
 
 xbee
