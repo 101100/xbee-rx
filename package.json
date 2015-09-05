@@ -25,6 +25,7 @@
     },
     "dependencies": {
         "parambulator": "^1.5",
+        "ramda": "^0.17",
         "rx": "^2.5",
         "serialport": "^1.7",
         "xbee-api": "^0.3"
