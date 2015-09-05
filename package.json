@@ -38,6 +38,7 @@
         "grunt-contrib-watch": "^0.6",
         "moment": "^2.10",
         "proxyquire": "^1.6",
+        "request": "^2.61",
         "should": "^7.0"
     },
     "scripts": {
