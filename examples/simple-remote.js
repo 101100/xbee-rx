@@ -49,8 +49,34 @@ xbee
         commandParameter: commandParameter,
         destinationId: destinationId
     })
-    .subscribe(function (f) {
-        console.log("Command successful:\n", f);
+    .subscribe(function (resultBuffer) {
+        var resultAsInt,
+            resultAsString;
+
+        console.log("Command successful!");
+
+        if (resultBuffer) {
+            if (resultBuffer.length === 0) {
+                console.log("Result is empty");
+            }
+            resultAsString = resultBuffer.toString();
+            if (resultAsString && !/[^\x20-\x7E]+/.test(resultAsString)) {
+                console.log("Result as string:", resultAsString);
+            }
+
+            if (resultBuffer.length == 1) {
+                resultAsInt = resultBuffer.readInt8(0);
+            } else if (resultBuffer.length === 2) {
+                resultAsInt = resultBuffer.readInt16BE(0);
+            } else if (resultBuffer.length === 4) {
+                resultAsInt = resultBuffer.readInt32BE(0);
+            }
+            if (typeof(resultAsInt) === "number") {
+                console.log("Result as integer:", resultAsInt);
+            }
+        } else {
+            console.log("No result buffer");
+        }
     }, function (e) {
         console.log("Command failed:\n", e);
         xbee.close();

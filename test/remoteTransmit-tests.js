@@ -310,11 +310,11 @@ describe('xbee-rx', function () {
 
                         });
 
-                        it("emits 'true'", function (done) {
+                        it("completes without any value", function (done) {
 
                             commandResultStream
-                                .subscribe(function (result) {
-                                    result.should.equal(true);
+                                .subscribe(function () {
+                                    assert.fail("Stream emitted something");
                                 }, function () {
                                     assert.fail("Stream ended with error");
                                 }, function () {

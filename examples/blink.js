@@ -46,7 +46,11 @@ var alternatingTrueFalse = rx.Observable.timer(0, 2000)
     .map(R.modulo(R.__, 2))
     .map(R.eq(0));
 
-alternatingTrueFalse
+// stream indicating we're ready for the next blink (to prevent
+// multiple commands "in the air" at the same time)
+var readyStream = new rx.Subject();
+
+rx.Observable.zip(alternatingTrueFalse, readyStream, R.identity)
     .takeUntil(ctrlCStream)
     .flatMap(function (onNext) {
         process.stdout.write("Turning LED " + (onNext ? "ON." : "OFF") + "...");
@@ -60,6 +64,7 @@ alternatingTrueFalse
     .subscribe(
         function () {
             console.log(" success.");
+            readyStream.onNext(true);
         },
         function (err) {
             console.log(" command failed:\n", err);
@@ -72,3 +77,6 @@ alternatingTrueFalse
             process.exit();
         }
     );
+
+// kick-start first LED command
+readyStream.onNext(true);

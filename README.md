@@ -66,9 +66,6 @@ xbee.localCommand({
     console.log("ATMY response:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
-}, function () {
-    xbee.close();
 })
 ```
 
@@ -84,9 +81,6 @@ xbee.localCommand({
     console.log("Success!");
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
-}, function () {
-    xbee.close();
 });
 ```
 
@@ -109,9 +103,6 @@ xbee.remoteCommand({
     console.log("ATD0 response from FUNNODE:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
-}, function () {
-    xbee.close();
 });
 ```
 
@@ -128,9 +119,6 @@ xbee.remoteCommand({
     console.log("ATD3 response from FUNNODE:\n", response);
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
-}, function () {
-    xbee.close();
 });
 ```
 
@@ -149,9 +137,6 @@ xbee.remoteCommand({
     console.log("Success!");
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
-}, function () {
-    xbee.close();
 });
 ```
 
@@ -167,15 +152,94 @@ xbee.remoteTransmit({
     destinationId: "FUNNODE",
     data: "I'm sending you text, FUNNODE!"
 }).subscribe(function (response) {
-    // response will be true for a successful transmision
-    console.log("Text sent to FUNNODE!");
+    // nothing should be emitted, so this can be ignored
 }, function (e) {
     console.log("Command failed:\n", e);
-    xbee.close();
 }, function () {
-    xbee.close();
+    // successful completion of the stream indicates success
+    console.log("Text sent to FUNNODE!");
 });
 ```
+
+### Monitoring incoming packets
+
+You can subscribe to incoming packets in three ways.  You can monitor all incoming
+packets by subscribing to `allPackets`.
+
+```javascript
+var subscription = xbee.allPackets
+    .subscribe(function (packet) {
+        // do something with the packet
+    });
+```
+
+You can monitor incoming IO data sample packets by calling `monitorIODataPackets`.
+That returns a stream of all packets filtered on the IO sample type.
+
+```javascript
+var subscription = xbee
+    .monitorIODataPackets()
+    .subscribe(function (ioSamplePacket) {
+        // do something with the packet
+        console.log("Analog sample from AD0:", ioSamplePacket.analogSamples.AD0);
+    });
+```
+
+You can also monitor incoming transmission packets by calling `monitorTransmissions`.
+That returns a stream of all packets filtered on the transmission type.
+
+```javascript
+var subscription = xbee
+    .monitorTransmissions()
+    .subscribe(function (transmissionPacket) {
+        // do something with the packet
+        console.log("Recieved remote transmission:", transmissionPacket.data);
+    });
+```
+
+In all cases, the subscription should be cleaned up when you are done using it by
+calling `dispose` on the subscription.
+
+```javascript
+subscription.dispose();
+```
+
+### Closing the connection
+
+When you are done using the library, you should call the `close` method to clean up
+the `xbee-rx` module as well as the contained serialport connection.
+
+```javascript
+xbee.close();
+```
+
+### A note about subscriptions
+
+All of the commands must be subcribed to before they will activate.  For example,
+the following code will have no effect.
+
+```javascript
+xbee.remoteTransmit({
+    // this ID must be set on the target node with ATNI
+    destinationId: "FUNNODE",
+    data: "I'm sending you text, FUNNODE!"
+});
+```
+
+Typically, you would want to subscribe to see if the command worked (was acknowledged
+by the XBee module), so that you could print an error or try again.  If you don't
+care about the result, you will still need to make a dummy subscription to trigger
+the command, as in the following code.
+
+```javascript
+xbee.remoteTransmit({
+    // this ID must be set on the target node with ATNI
+    destinationId: "FUNNODE",
+    data: "I'm sending you text, FUNNODE!"
+}).subscribe(); // ignore status/result packet
+```
+
+### More examples
 
 Some more examples can be found in
 [the repository](https://github.com/101100/xbee-rx/tree/master/examples).
@@ -183,7 +247,6 @@ Some more examples can be found in
 ## Possible future work
 
 Future possible expansion of this module include:
-- Adding stream of incoming transmissions
 - Adding command line tool to perform all three types of commands (for testing, etc).
 - Translating inputs and outputs of commands logically.  E.g. ATNI command should
   return a string, not an array of character codes, ATD1 (and friends) should accept
