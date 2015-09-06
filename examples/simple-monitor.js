@@ -1,10 +1,11 @@
 /*jslint node:true */
 
 /*
- * examples/simple-local.js
+ * examples/simple-monitor.js
  * https://github.com/101100/xbee-rx
  *
- * Simple example showing the use of allPackets and how to clean up on CTRL-C.
+ * Simple example showing how to monitor incoming transmissions and how
+ * to clean up on CTRL-C.
  *
  * Copyright (c) 2014 Jason Heard
  * Licensed under the MIT license.
@@ -38,17 +39,21 @@ var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
     .take(1);
 
 xbee
-    .allPackets
+    .monitorTransmissions()
+    .pluck("data")
+    .map(function (buffer) {
+        var s = buffer.toString();
+        return s === '\r' ? '\n' : s;
+    })
     .takeUntil(ctrlCStream)
-    .timestamp()
-    .subscribe(function (x) {
-        console.log(new Date(x.timestamp), "got packet:\n", x.value);
+    .subscribe(function (s) {
+        process.stdout.write(s);
     }, function (error) {
         console.log("Error during monitoring:\n", error);
         xbee.close();
         process.exit();
     }, function () {
-        console.log("Got CTRL-C; exiting.");
+        console.log("\nGot CTRL-C; exiting.");
         xbee.close();
         process.exit();
     });
