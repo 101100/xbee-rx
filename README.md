@@ -152,10 +152,12 @@ xbee.remoteTransmit({
     destinationId: "FUNNODE",
     data: "I'm sending you text, FUNNODE!"
 }).subscribe(function (response) {
-    // response will be true for a successful transmision
-    console.log("Text sent to FUNNODE!");
+    // nothing should be emitted, so this can be ignored
 }, function (e) {
     console.log("Command failed:\n", e);
+}, function () {
+    // successful completion of the stream indicates success
+    console.log("Text sent to FUNNODE!");
 });
 ```
 
