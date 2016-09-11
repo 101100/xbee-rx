@@ -30,21 +30,21 @@
   },
   "dependencies": {
     "parambulator": "^1.5",
-    "ramda": "^0.17",
-    "rx": "^2.5",
-    "serialport": "^1.7",
-    "xbee-api": "^0.3"
+    "ramda": "^0.22",
+    "rx": "^4.1",
+    "serialport": "^4.0",
+    "xbee-api": "^0.4"
   },
   "devDependencies": {
-    "grunt": "^0.4",
-    "grunt-cli": "^0.1",
+    "grunt": "^1.0",
+    "grunt-cli": "^1.2",
     "grunt-jslint": "^1.1",
     "grunt-simple-mocha": "^0.4",
-    "grunt-contrib-watch": "^0.6",
+    "grunt-contrib-watch": "^1.0",
     "moment": "^2.10",
     "proxyquire": "^1.6",
     "request": "^2.61",
-    "should": "^7.0"
+    "should": "^11.1"
   },
   "scripts": {
     "test": "grunt test",
