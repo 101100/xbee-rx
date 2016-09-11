@@ -75,8 +75,7 @@ var streamId = "stream-id (defined by you)";
 
 xbee
     .monitorTransmissions()
-    .pluck("analogSamples")
-    .pluck("AD0")
+    .pluck("analogSamples", "AD0")
     .map(function (mv) { return (mv - 500) / 10; })
     .buffer(function () { return rx.Observable.timer(60000); })
     .map(R.mean)

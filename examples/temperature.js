@@ -38,8 +38,7 @@ var lastMoment = undefined;
 
 xbee
     .monitorIODataPackets()
-    .pluck("analogSamples")
-    .pluck("AD0") // extract just the AD0 sample (in millivolts)
+    .pluck("analogSamples", "AD0") // extract just the AD0 sample (in millivolts)
     .map(function (mv) { return (mv - 500) / 10; }) // convert millivolts to Centigrade
     .buffer(function () { return rx.Observable.timer(10000); }) // collect 10 seconds of packets
     .map(R.mean) // compute the mean of the collected samples
