@@ -7,7 +7,7 @@
  * Simple example showing how to monitor incoming transmissions and how
  * to clean up on CTRL-C.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2015-2016 Jason Heard
  * Licensed under the MIT license.
  */
 

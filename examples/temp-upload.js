@@ -12,7 +12,7 @@
  * program will average 10 seconds of samples and then upload a sample to a Xively
  * data stream.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2015-2016 Jason Heard
  * Licensed under the MIT license.
  */
 

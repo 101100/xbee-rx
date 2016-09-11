@@ -6,7 +6,7 @@
  *
  * Example that blinks a LED on AD1 on a remote module
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2014-2016 Jason Heard
  * Licensed under the MIT license.
  */
 

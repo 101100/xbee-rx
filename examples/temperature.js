@@ -12,7 +12,7 @@
  * program will average 10 seconds of samples and print them if at least a minute
  * has gone by or the temperature changes.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2015-2016 Jason Heard
  * Licensed under the MIT license.
  */
 
