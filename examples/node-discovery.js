@@ -27,6 +27,19 @@ var xbee = xbeeRx({
     debug: false
 });
 
+// we want to ignore the command stream result as well as any error (for no
+// reply resulting from no found nodes)
+var nodeDiscoveryCommandStream = xbee
+    .localCommand({ command: 'ND' })
+    .catch(rx.Observable.empty())
+    .ignoreElements();
+
+var nodeDiscoveryRepliesStream = xbee
+    .allPackets
+    .where(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE))
+    .where(R.propEq("command", "ND"))
+    .pluck("nodeIdentification");
+
 xbee
     .localCommand({
         command: 'NT',
@@ -36,13 +49,9 @@ xbee
         // NT is 1/10 seconds
         var timeoutMs = ntResult.readInt16BE(0) * 100;
         console.log("Got node discovery timeout:", timeoutMs, "ms");
-        xbee.localCommand({ command: 'ND' }).subscribe();
-        return xbee
-            .allPackets
+        return nodeDiscoveryRepliesStream
             .takeUntil(rx.Observable.timer(timeoutMs + 1000))
-            .where(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE))
-            .where(R.propEq("command", "ND"))
-            .pluck("nodeIdentification");
+            .merge( nodeDiscoveryCommandStream);
     })
     .subscribe(function (nodeIdentification) {
         console.log("Found node:\n", nodeIdentification);
