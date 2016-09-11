@@ -21,7 +21,7 @@ var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport,
+    'serialport': mockserialport.MockSerialPort,
     'xbee-api': mockXbeeApi
 });
 

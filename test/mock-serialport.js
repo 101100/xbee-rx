@@ -52,4 +52,4 @@ MockSerialPort.prototype.drain = function (callback) {
 
 module.exports = mockdata;
 
-module.exports.SerialPort = MockSerialPort;
+module.exports.MockSerialPort = MockSerialPort;
