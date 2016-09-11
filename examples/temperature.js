@@ -36,12 +36,17 @@ var xbee = xbeeRx({
 var lastValue = undefined;
 var lastMoment = undefined;
 
-xbee
+var temperatureStream = xbee
     .monitorIODataPackets()
     .pluck("analogSamples", "AD0") // extract just the AD0 sample (in millivolts)
-    .map(function (mv) { return (mv - 500) / 10; }) // convert millivolts to Centigrade
+    .map(function (mv) { return (mv - 500) / 10; }); // convert millivolts to Centigrade
+
+var meanTemperatureStream = temperatureStream
     .buffer(function () { return rx.Observable.timer(10000); }) // collect 10 seconds of packets
     .map(R.mean) // compute the mean of the collected samples
+    .map(function (value) { return Math.round(value * 10) / 10; }); // round to 1 decimal place
+
+meanTemperatureStream
     .where(function (value) {
         return value !== lastValue || moment().diff(lastMoment, 'minutes') > 1;
     })

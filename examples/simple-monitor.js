@@ -38,13 +38,15 @@ var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
     })
     .take(1);
 
-xbee
+var transmissionsStream = xbee
     .monitorTransmissions()
     .pluck("data")
     .map(function (buffer) {
         var s = buffer.toString();
         return s === '\r' ? '\n' : s;
-    })
+    });
+
+transmissionsStream
     .takeUntil(ctrlCStream)
     .subscribe(function (s) {
         process.stdout.write(s);
