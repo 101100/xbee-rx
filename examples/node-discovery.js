@@ -39,7 +39,7 @@ xbee
         xbee.localCommand({ command: 'ND' }).subscribe();
         return xbee
             .allPackets
-            .takeUntil(rx.Observable.timer(timeoutMs * 2))
+            .takeUntil(rx.Observable.timer(timeoutMs + 1000))
             .where(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE))
             .where(R.propEq("command", "ND"))
             .pluck("nodeIdentification");
