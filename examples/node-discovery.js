@@ -51,7 +51,7 @@ xbee
         console.log("Got node discovery timeout:", timeoutMs, "ms");
         return nodeDiscoveryRepliesStream
             .takeUntil(rx.Observable.timer(timeoutMs + 1000))
-            .merge( nodeDiscoveryCommandStream);
+            .merge(nodeDiscoveryCommandStream);
     })
     .subscribe(function (nodeIdentification) {
         console.log("Found node:\n", nodeIdentification);

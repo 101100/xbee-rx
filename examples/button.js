@@ -38,11 +38,11 @@ var buttonPressStream = xbee
     .pluck("digitalSamples", "DIO1")
     // pluck results in undefined if the sample doesn't exist, so filter that out
     .where(function (sample) {
-        return sample != undefined;
+        return sample !== undefined;
     })
     // ignore any repeats
-    .distinctUntilChanged()                    
-    .timeInterval()                            
+    .distinctUntilChanged()
+    .timeInterval()
     // the button is pressed when the button is released after being pressed for less than 1 second
     .where(x => x.value == 1 && x.interval < 1000)
     // ignore multiple button presses within one second
