@@ -7,7 +7,7 @@
  *
  * Tests for the xbee-rx library close function.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2014-2016 Jason Heard
  * Licensed under the MIT license.
  */
 
@@ -20,7 +20,7 @@ var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport,
+    'serialport': mockserialport.MockSerialPort,
     'xbee-api': mockXbeeApi
 });
 

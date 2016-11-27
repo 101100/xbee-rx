@@ -12,7 +12,7 @@
  * program will average 10 seconds of samples and print them if at least a minute
  * has gone by or the temperature changes.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2015-2016 Jason Heard
  * Licensed under the MIT license.
  */
 
@@ -36,13 +36,17 @@ var xbee = xbeeRx({
 var lastValue = undefined;
 var lastMoment = undefined;
 
-xbee
+var temperatureStream = xbee
     .monitorIODataPackets()
-    .pluck("analogSamples")
-    .pluck("AD0") // extract just the AD0 sample (in millivolts)
-    .map(function (mv) { return (mv - 500) / 10; }) // convert millivolts to Centigrade
+    .pluck("analogSamples", "AD0") // extract just the AD0 sample (in millivolts)
+    .map(function (mv) { return (mv - 500) / 10; }); // convert millivolts to Centigrade
+
+var meanTemperatureStream = temperatureStream
     .buffer(function () { return rx.Observable.timer(10000); }) // collect 10 seconds of packets
     .map(R.mean) // compute the mean of the collected samples
+    .map(function (value) { return Math.round(value * 10) / 10; }); // round to 1 decimal place
+
+meanTemperatureStream
     .where(function (value) {
         return value !== lastValue || moment().diff(lastMoment, 'minutes') > 1;
     })

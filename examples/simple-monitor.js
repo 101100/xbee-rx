@@ -7,7 +7,7 @@
  * Simple example showing how to monitor incoming transmissions and how
  * to clean up on CTRL-C.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2015-2016 Jason Heard
  * Licensed under the MIT license.
  */
 
@@ -38,13 +38,15 @@ var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
     })
     .take(1);
 
-xbee
+var transmissionsStream = xbee
     .monitorTransmissions()
     .pluck("data")
     .map(function (buffer) {
         var s = buffer.toString();
         return s === '\r' ? '\n' : s;
-    })
+    });
+
+transmissionsStream
     .takeUntil(ctrlCStream)
     .subscribe(function (s) {
         process.stdout.write(s);

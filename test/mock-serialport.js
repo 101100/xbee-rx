@@ -6,7 +6,7 @@
  *
  * Mock serialport used to test xbee-promise library.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2014-2016 Jason Heard
  * Licensed under the MIT license.
  *
  * Inspired by firmata MockSerialPort:
@@ -52,4 +52,4 @@ MockSerialPort.prototype.drain = function (callback) {
 
 module.exports = mockdata;
 
-module.exports.SerialPort = MockSerialPort;
+module.exports.MockSerialPort = MockSerialPort;

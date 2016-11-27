@@ -6,7 +6,7 @@
  *
  * Simple example showing the use of remoteCommand and the returned RX stream.
  *
- * Copyright (c) 2014 Jason Heard
+ * Copyright (c) 2014-2016 Jason Heard
  * Licensed under the MIT license.
  */
 

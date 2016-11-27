@@ -1,8 +1,14 @@
 {
   "name": "xbee-rx",
   "version": "1.1.0",
-  "homepage": "https://github.com/101100/xbee-rx",
   "description": "Reactive extensions library for XBee wireless modules based on xbee-api",
+  "author": {
+    "name": "Jason Heard",
+    "email": "jasonpheard@gmail.com"
+  },
+  "license": "MIT",
+  "main": "./lib/xbee-rx.js",
+  "homepage": "https://github.com/101100/xbee-rx",
   "keywords": [
     "xbee",
     "zigbee",
@@ -12,10 +18,6 @@
     "rxjs",
     "serialport"
   ],
-  "author": {
-    "name": "Jason Heard",
-    "email": "jasonpheard@gmail.com"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/101100/xbee-rx.git"
@@ -23,33 +25,26 @@
   "bugs": {
     "url": "https://github.com/101100/xbee-rx/issues"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/101100/xbee-rx/blob/master/LICENSE"
-    }
-  ],
-  "main": "./lib/xbee-rx.js",
   "engines": {
     "node": ">= 0.10.0"
   },
   "dependencies": {
     "parambulator": "^1.5",
-    "ramda": "^0.17",
-    "rx": "^2.5",
-    "serialport": "^1.7",
-    "xbee-api": "^0.3"
+    "ramda": "^0.22",
+    "rx": "^4.1",
+    "serialport": "^4.0",
+    "xbee-api": "^0.4"
   },
   "devDependencies": {
-    "grunt": "^0.4",
-    "grunt-cli": "^0.1",
+    "grunt": "^1.0",
+    "grunt-cli": "^1.2",
+    "grunt-contrib-watch": "^1.0",
     "grunt-jslint": "^1.1",
     "grunt-simple-mocha": "^0.4",
-    "grunt-contrib-watch": "^0.6",
     "moment": "^2.10",
     "proxyquire": "^1.6",
     "request": "^2.61",
-    "should": "^7.0"
+    "should": "^11.1"
   },
   "scripts": {
     "test": "grunt test",
