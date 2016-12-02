@@ -33,7 +33,7 @@
     "ramda": "^0.22",
     "rx": "^4.1",
     "serialport": "^4.0",
-    "xbee-api": "^0.4"
+    "xbee-api": "^0.5.1"
   },
   "devDependencies": {
     "grunt": "^1.0",
