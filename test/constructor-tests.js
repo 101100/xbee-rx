@@ -1,5 +1,5 @@
 /*jslint node:true, regexp: true */
-/*global describe:false, it:false, beforeEach:false */
+/*global describe:false, it:false */
 
 /*
  * test/constructor-tests.js
@@ -13,20 +13,20 @@
 
 "use strict";
 
-var should = require("should");
+require("should");
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport.MockSerialPort,
-    'xbee-api': mockXbeeApi
+    "serialport": mockserialport.MockSerialPort,
+    "xbee-api": mockXbeeApi
 });
 
-describe('xbee-rx', function () {
+describe("xbee-rx", function () {
 
-    describe('constructor', function () {
+    describe("constructor", function () {
 
         function callConstructor(params) {
             return function () {
@@ -58,7 +58,7 @@ describe('xbee-rx', function () {
 
             callConstructor({
                 serialport: "serialport path",
-                a: 'a'
+                a: "a"
             }).should.throw(/property 'module' is missing/);
 
         });
@@ -130,7 +130,7 @@ describe('xbee-rx', function () {
                 xbee;
 
             xbee = xbeeRx({ serialport: serialport, module: "ZigBee" });
-            xbee.should.be.type('object');
+            xbee.should.be.type("object");
             mockserialport.opened.should.equal(true);
             mockserialport.path.should.equal(serialport);
 
@@ -142,9 +142,9 @@ describe('xbee-rx', function () {
                 xbee;
 
             xbee = xbeeRx({ serialport: serialport, module: "ZigBee" });
-            xbee.should.be.type('object');
+            xbee.should.be.type("object");
             mockserialport.opened.should.equal(true);
-            mockserialport.options.should.be.type('object');
+            mockserialport.options.should.be.type("object");
             mockserialport.options.should.have.property("parser", mockXbeeApi.fauxParser);
 
         });
@@ -160,9 +160,9 @@ describe('xbee-rx', function () {
                 xbee;
 
             xbee = xbeeRx({ serialport: serialport, module: "ZigBee", serialportOptions: serialportOptions });
-            xbee.should.be.type('object');
+            xbee.should.be.type("object");
             mockserialport.opened.should.equal(true);
-            mockserialport.options.should.be.type('object');
+            mockserialport.options.should.be.type("object");
             mockserialport.options.should.have.property("parser", mockXbeeApi.fauxParser);
             mockserialport.options.should.have.property("string", "never");
             mockserialport.options.should.have.property("numeric", 42);

@@ -13,20 +13,20 @@
 
 "use strict";
 
-var should = require("should");
+require("should");
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport.MockSerialPort,
-    'xbee-api': mockXbeeApi
+    "serialport": mockserialport.MockSerialPort,
+    "xbee-api": mockXbeeApi
 });
 
-describe('xbee-rx', function () {
+describe("xbee-rx", function () {
 
-    describe('close', function () {
+    describe("close", function () {
 
         var xbee;
 

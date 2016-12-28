@@ -29,6 +29,7 @@
     "node": ">= 0.10.0"
   },
   "dependencies": {
+    "grunt-contrib-jshint": "^1.1.0",
     "parambulator": "^1.5",
     "ramda": "^0.22",
     "rx": "^4.1",
@@ -39,7 +40,6 @@
     "grunt": "^1.0",
     "grunt-cli": "^1.2",
     "grunt-contrib-watch": "^1.0",
-    "grunt-jslint": "^1.1",
     "grunt-simple-mocha": "^0.4",
     "moment": "^2.10",
     "proxyquire": "^1.6",

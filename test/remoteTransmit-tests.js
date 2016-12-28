@@ -14,24 +14,24 @@
 "use strict";
 
 var assert = require("assert");
-var should = require("should");
+require("should");
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport.MockSerialPort,
-    'xbee-api': mockXbeeApi
+    "serialport": mockserialport.MockSerialPort,
+    "xbee-api": mockXbeeApi
 });
 
-describe('xbee-rx', function () {
+describe("xbee-rx", function () {
 
     [ "802.15.4", "ZNet", "ZigBee" ].forEach(function (module) {
 
         describe("for module " + module, function () {
 
-            describe('remoteTransmit', function () {
+            describe("remoteTransmit", function () {
 
                 var xbee;
 
@@ -219,7 +219,7 @@ describe('xbee-rx', function () {
                             },
                             {
                                 data: "Test data",
-                                destinationId: ['array', 'no', 'good!']
+                                destinationId: ["array", "no", "good!"]
                             }
                         ];
 
@@ -246,13 +246,13 @@ describe('xbee-rx', function () {
 
                     callRemoteTransmit({
                         data: "Test data",
-                        destination64: '0102030405060708',
-                        timeoutMs: 'not too long'
+                        destination64: "0102030405060708",
+                        timeoutMs: "not too long"
                     }).should.throw(/not of type 'integer'/);
 
                     callRemoteTransmit({
                         data: "Test data",
-                        destination64: '0102030405060708',
+                        destination64: "0102030405060708",
                         timeoutMs: -12
                     }).should.throw(/not greater than or equal with '10'/);
 
@@ -286,13 +286,13 @@ describe('xbee-rx', function () {
 
                     it("sends correct frame", function () {
 
-                        mockserialport.lastWrite.should.be.type('object');
-                        mockserialport.lastWrite.should.have.property('built', true);
-                        mockserialport.lastWrite.should.have.property('type', module === "802.15.4" ? mockXbeeApi.constants.FRAME_TYPE.TX_REQUEST_64 : mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
-                        mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                        mockserialport.lastWrite.should.have.property('data', data);
-                        mockserialport.lastWrite.should.have.property('destination64', destination64);
-                        mockserialport.lastWrite.should.have.property('destination16', undefined);
+                        mockserialport.lastWrite.should.be.type("object");
+                        mockserialport.lastWrite.should.have.property("built", true);
+                        mockserialport.lastWrite.should.have.property("type", module === "802.15.4" ? mockXbeeApi.constants.FRAME_TYPE.TX_REQUEST_64 : mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
+                        mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                        mockserialport.lastWrite.should.have.property("data", data);
+                        mockserialport.lastWrite.should.have.property("destination64", destination64);
+                        mockserialport.lastWrite.should.have.property("destination16", undefined);
 
                     });
 
@@ -481,13 +481,13 @@ describe('xbee-rx', function () {
 
                     it("sends correct frame", function () {
 
-                        mockserialport.lastWrite.should.be.type('object');
-                        mockserialport.lastWrite.should.have.property('built', true);
-                        mockserialport.lastWrite.should.have.property('type', module === "802.15.4" ? mockXbeeApi.constants.FRAME_TYPE.TX_REQUEST_16 : mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
-                        mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                        mockserialport.lastWrite.should.have.property('data', data);
-                        mockserialport.lastWrite.should.have.property('destination64', undefined);
-                        mockserialport.lastWrite.should.have.property('destination16', destination16);
+                        mockserialport.lastWrite.should.be.type("object");
+                        mockserialport.lastWrite.should.have.property("built", true);
+                        mockserialport.lastWrite.should.have.property("type", module === "802.15.4" ? mockXbeeApi.constants.FRAME_TYPE.TX_REQUEST_16 : mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
+                        mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                        mockserialport.lastWrite.should.have.property("data", data);
+                        mockserialport.lastWrite.should.have.property("destination64", undefined);
+                        mockserialport.lastWrite.should.have.property("destination16", destination16);
 
                     });
 
@@ -678,12 +678,12 @@ describe('xbee-rx', function () {
 
                         it("sends lookup frame", function () {
 
-                            mockserialport.lastWrite.should.be.type('object');
-                            mockserialport.lastWrite.should.have.property('built', true);
-                            mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                            mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                            mockserialport.lastWrite.should.have.property('command', "DN");
-                            mockserialport.lastWrite.should.have.property('commandParameter', destinationId);
+                            mockserialport.lastWrite.should.be.type("object");
+                            mockserialport.lastWrite.should.have.property("built", true);
+                            mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                            mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                            mockserialport.lastWrite.should.have.property("command", "DN");
+                            mockserialport.lastWrite.should.have.property("commandParameter", destinationId);
 
                         });
 
@@ -702,13 +702,13 @@ describe('xbee-rx', function () {
 
                             it("sends remote command frame", function () {
 
-                                mockserialport.lastWrite.should.be.type('object');
-                                mockserialport.lastWrite.should.have.property('built', true);
-                                mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
-                                mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                mockserialport.lastWrite.should.have.property('data', data);
-                                mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                mockserialport.lastWrite.should.have.property('destination16', undefined);
+                                mockserialport.lastWrite.should.be.type("object");
+                                mockserialport.lastWrite.should.have.property("built", true);
+                                mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
+                                mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                                mockserialport.lastWrite.should.have.property("data", data);
+                                mockserialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
+                                mockserialport.lastWrite.should.have.property("destination16", undefined);
 
                             });
 
@@ -884,13 +884,13 @@ describe('xbee-rx', function () {
 
                                 it("sends remote command frame", function () {
 
-                                    mockserialport.lastWrite.should.be.type('object');
-                                    mockserialport.lastWrite.should.have.property('built', true);
-                                    mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
-                                    mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                    mockserialport.lastWrite.should.have.property('data', data2);
-                                    mockserialport.lastWrite.should.have.property('destination64', [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                    mockserialport.lastWrite.should.have.property('destination16', undefined);
+                                    mockserialport.lastWrite.should.be.type("object");
+                                    mockserialport.lastWrite.should.have.property("built", true);
+                                    mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.ZIGBEE_TRANSMIT_REQUEST);
+                                    mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                                    mockserialport.lastWrite.should.have.property("data", data2);
+                                    mockserialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
+                                    mockserialport.lastWrite.should.have.property("destination16", undefined);
 
                                 });
 
@@ -913,12 +913,12 @@ describe('xbee-rx', function () {
 
                                 it("sends lookup frame", function () {
 
-                                    mockserialport.lastWrite.should.be.type('object');
-                                    mockserialport.lastWrite.should.have.property('built', true);
-                                    mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                                    mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                                    mockserialport.lastWrite.should.have.property('command', "DN");
-                                    mockserialport.lastWrite.should.have.property('commandParameter', destinationId2);
+                                    mockserialport.lastWrite.should.be.type("object");
+                                    mockserialport.lastWrite.should.have.property("built", true);
+                                    mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                                    mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                                    mockserialport.lastWrite.should.have.property("command", "DN");
+                                    mockserialport.lastWrite.should.have.property("commandParameter", destinationId2);
 
                                 });
 
