@@ -341,20 +341,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -379,24 +377,21 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
-
                         });
 
                     });
@@ -536,20 +531,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -574,20 +567,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -757,20 +748,18 @@ describe("xbee-rx", function () {
 
                                 it("does not emit data, complete or error", function (done) {
 
-                                    var areDone = false;
+                                    var subscription;
 
                                     setTimeout(function () {
-                                        areDone = true;
+                                        subscription.dispose();
                                         done();
                                     }, 50);
 
-                                    commandResultStream
+                                    subscription = commandResultStream
                                         .subscribe(function () {
                                             assert.fail("Stream contained data");
                                         }, function () {
-                                            if (!areDone) {
-                                                assert.fail("Stream ended with error early");
-                                            }
+                                            assert.fail("Stream ended with error");
                                         }, function () {
                                             assert.fail("Stream completed");
                                         });
@@ -795,20 +784,18 @@ describe("xbee-rx", function () {
 
                                 it("does not emit data, complete or error", function (done) {
 
-                                    var areDone = false;
+                                    var subscription;
 
                                     setTimeout(function () {
-                                        areDone = true;
+                                        subscription.dispose();
                                         done();
                                     }, 50);
 
-                                    commandResultStream
+                                    subscription = commandResultStream
                                         .subscribe(function () {
                                             assert.fail("Stream contained data");
                                         }, function () {
-                                            if (!areDone) {
-                                                assert.fail("Stream ended with error early");
-                                            }
+                                            assert.fail("Stream ended with error");
                                         }, function () {
                                             assert.fail("Stream completed");
                                         });
@@ -941,20 +928,18 @@ describe("xbee-rx", function () {
 
                             it("does not emit data, complete or error", function (done) {
 
-                                var areDone = false;
+                                var subscription;
 
                                 setTimeout(function () {
-                                    areDone = true;
+                                    subscription.dispose();
                                     done();
                                 }, 50);
 
-                                commandResultStream
+                                subscription = commandResultStream
                                     .subscribe(function () {
                                         assert.fail("Stream contained data");
                                     }, function () {
-                                        if (!areDone) {
-                                            assert.fail("Stream ended with error early");
-                                        }
+                                        assert.fail("Stream ended with error");
                                     }, function () {
                                         assert.fail("Stream completed");
                                     });
@@ -978,20 +963,18 @@ describe("xbee-rx", function () {
 
                             it("does not emit data, complete or error", function (done) {
 
-                                var areDone = false;
+                                var subscription;
 
                                 setTimeout(function () {
-                                    areDone = true;
+                                    subscription.dispose();
                                     done();
                                 }, 50);
 
-                                commandResultStream
+                                subscription = commandResultStream
                                     .subscribe(function () {
                                         assert.fail("Stream contained data");
                                     }, function () {
-                                        if (!areDone) {
-                                            assert.fail("Stream ended with error early");
-                                        }
+                                        assert.fail("Stream ended with error");
                                     }, function () {
                                         assert.fail("Stream completed");
                                     });
