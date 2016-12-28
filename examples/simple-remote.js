@@ -30,7 +30,7 @@ var commandParameter = (process.argv && process.argv[4]) || [];
 
 if (!destinationId || process.argv[5]) {
     console.error("Usage:");
-    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID> [<command>]");
+    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID or *> [<command>]");
     process.exit(1);
 }
 
@@ -47,7 +47,8 @@ xbee
     .remoteCommand({
         command: command,
         commandParameter: commandParameter,
-        destinationId: destinationId
+        destinationId: destinationId !== "*" ? destinationId : undefined,
+        broadcast: destinationId === "*"
     })
     .subscribe(function (resultBuffer) {
         var resultAsInt,

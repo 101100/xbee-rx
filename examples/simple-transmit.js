@@ -29,13 +29,14 @@ var data = process.argv && process.argv[3];
 
 if (!data || process.argv[4]) {
     console.error("Usage:");
-    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID> <data>");
+    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID or *> <data>");
     process.exit(1);
 }
 
 xbee
     .remoteTransmit({
-        destinationId: destinationId,
+        destinationId: destinationId !== "*" ? destinationId : undefined,
+        broadcast: destinationId === "*",
         data: data
     })
     .subscribe(function () {
