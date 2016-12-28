@@ -13,12 +13,11 @@
 
 "use strict";
 
-var R = require("ramda");
 var rx = require("rx");
-var xbeeRx = require('../lib/xbee-rx.js');
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -27,12 +26,12 @@ var xbee = xbeeRx({
     debug: false
 });
 
-console.log('Monitoring incoming packets (press CTRL-C to stop)');
+console.log("Monitoring incoming packets (press CTRL-C to stop)");
 
 // monitor CTRL-C to close serial connection
 var stdin = process.stdin;
 stdin.setRawMode(true);
-var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
+var ctrlCStream = rx.Observable.fromEvent(stdin, "data")
     .where(function monitorCtrlCOnData(data) {
         return data.length === 1 && data[0] === 0x03; // Ctrl+C
     })
@@ -43,7 +42,7 @@ var transmissionsStream = xbee
     .pluck("data")
     .map(function (buffer) {
         var s = buffer.toString();
-        return s === '\r' ? '\n' : s;
+        return s === "\r" ? "\n" : s;
     });
 
 transmissionsStream

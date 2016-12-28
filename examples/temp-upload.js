@@ -18,11 +18,10 @@
 
 "use strict";
 
-var querystring = require("querystring");
-var R = require('ramda');
+var R = require("ramda");
 var rx = require("rx");
 var request = require("request");
-var xbeeRx = require('../lib/xbee-rx.js');
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var requestPut = rx.Observable.fromNodeCallback(request.put);
 
@@ -40,11 +39,11 @@ function xivelyPost(feedId, streamId, apiKey, currentValue) {
                 "current_value" : currentValue
             },
         ]
-    }
+    };
 
-    var requestUrl = 'https://api.xively.com/v2/feeds/' + feedId;
+    var requestUrl = "https://api.xively.com/v2/feeds/" + feedId;
 
-    var options = { 
+    var options = {
         url: requestUrl,
         headers: {
             "X-ApiKey" : apiKey,
@@ -59,7 +58,7 @@ function xivelyPost(feedId, streamId, apiKey, currentValue) {
 }
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },

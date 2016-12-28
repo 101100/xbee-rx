@@ -12,13 +12,13 @@
 
 "use strict";
 
-var xbeeRx = require('../lib/xbee-rx.js');
+var xbeeRx = require("../lib/xbee-rx.js");
 var rx = require("rx");
 var R = require("ramda");
 
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -29,12 +29,12 @@ var xbee = xbeeRx({
 
 var nodeId = "TEMP3";
 
-console.log('Blinking LED on AD1 on module with ID: ', nodeId);
+console.log("Blinking LED on AD1 on module with ID: ", nodeId);
 
 // monitor CTRL-C to close serial connection
 var stdin = process.stdin;
 stdin.setRawMode(true);
-var ctrlCStream = rx.Observable.fromEvent(stdin, 'data')
+var ctrlCStream = rx.Observable.fromEvent(stdin, "data")
     .where(function monitorCtrlCOnData(data) {
         return data.length === 1 && data[0] === 0x03; // Ctrl+C
     })
