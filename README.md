@@ -19,7 +19,7 @@ xbee-rx relies on
 ## Usage
 
 First, you will need to install the `xbee-rx` module (i.e.
-`npm install xbee-rx`).
+`npm install xbee-rx` or `yarn add xbee-rx`).
 
 ### Initialization
 
@@ -29,7 +29,12 @@ a number.  On unix and OS X machines, this will typically be `/dev/tty???`, wher
 `???` can be anything from `USB0` to `.usbserial-A4013E5P`. In addition, you will
 need to make sure that the module connected to your machine is in API mode and that
 you know the baudrate it is set to.  By default, the baudrate is 57600 when API
-mode is used.  In addition, you will need to know if you are using a ZigBee module, a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this library works between the ZigBee and ZNet modules.  Older series 2 modules have ZNet firmware and can typically be upgraded to ZigBee firmware.)  Once these details are known, you can initialize xbee-rx:
+mode is used.  In addition, you will need to know if you are using a ZigBee module,
+a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for
+ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this
+library works between the ZigBee and ZNet modules.  Older series 2 modules have ZNet
+firmware and can typically be upgraded to ZigBee firmware.)  Once these details are
+known, you can initialize xbee-rx:
 
 ```javascript
 var xbeeRx = require('xbee-rx');
@@ -88,8 +93,12 @@ xbee.localCommand({
 
 Remote commands may be performed using the `remoteCommand` fuction.  They are similar
 to local commands, but must have either a `destination64` 64 bit address, a
-`destination16` 16 bit address or a `destinationId` node ID to indicate the target of
-the command.  `destinationId` is not supported by 802.15.4 modules.
+`destination16` 16 bit address, a `destinationId` node ID to indicate the target of
+the command or the `broadcast` flag set to `true` to broadcast to all nodes.
+`destinationId` is not supported by 802.15.4 modules.
+
+Since there is support for broadcasting commands to multiple nodes, the entire frame is
+included in the resulting stream.
 
 ```javascript
 xbee.remoteCommand({
@@ -98,9 +107,9 @@ xbee.remoteCommand({
     command: "D0",
     // this ID must be set on the target node with ATNI
     destinationId: "FUNNODE"
-}).subscribe(function (response) {
-    // response will be a single value in an array, e.g. [ 1 ]
-    console.log("ATD0 response from FUNNODE:\n", response);
+}).subscribe(function (frame) {
+    // frame will be a single value in an array, e.g. [ 1 ]
+    console.log("ATD0 response from FUNNODE:\n", frame.commandData);
 }, function (e) {
     console.log("Command failed:\n", e);
 });
@@ -114,9 +123,9 @@ xbee.remoteCommand({
     command: "D3",
     // destination addresses can be in hexidecimal or byte arrays
     destination16: [ 0xa9, 0x78 ]
-}).subscribe(function (response) {
-    // response will be a single value in an array, e.g. [ 1 ]
-    console.log("ATD3 response from FUNNODE:\n", response);
+}).subscribe(function (frame) {
+    // frame will be a single value in an array, e.g. [ 1 ]
+    console.log("ATD3 response from address A978:\n", frame.commandData);
 }, function (e) {
     console.log("Command failed:\n", e);
 });
@@ -132,11 +141,27 @@ xbee.remoteCommand({
     // destination addresses can be in hexidecimal or byte arrays
     // serial number from the bottom of the module (or combination of ATSH and ATSL)
     destination64: '0013a20040a099a1'
-}).subscribe(function (response) {
-    // response will be [ 0 ] from the response frame
+}).subscribe(function (frame) {
+    // frame.commandData will be [ 0 ] from the response frame
     console.log("Success!");
 }, function (e) {
     console.log("Command failed:\n", e);
+});
+```
+
+
+```javascript
+xbee.remoteCommand({
+    // AT%V
+    // Return current voltage
+    command: "%V",
+    // broadcast will be sent to all nodes in the network
+    broadcast: true
+}).subscribe(function (frame) {
+    // response will be [ 0 ] from the response frame
+    console.log("Got response from " + frame.remote16 + ": " + frame.commandData);
+}, function (e) {
+    console.log("Command transmission failed:\n", e);
 });
 ```
 
