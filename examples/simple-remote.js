@@ -12,10 +12,10 @@
 
 "use strict";
 
-var xbeeRx = require('../lib/xbee-rx.js');
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -25,12 +25,12 @@ var xbee = xbeeRx({
 });
 
 var destinationId = process.argv && process.argv[2];
-var command = (process.argv && process.argv[3]) || 'MY';
+var command = (process.argv && process.argv[3]) || "MY";
 var commandParameter = (process.argv && process.argv[4]) || [];
 
 if (!destinationId || process.argv[5]) {
-    console.error('Usage:');
-    console.error(process.argv.slice(0, 2).join(' ') + ' <destination ID> [<command>]');
+    console.error("Usage:");
+    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID> [<command>]");
     process.exit(1);
 }
 
@@ -64,7 +64,7 @@ xbee
                 console.log("Result as string:", resultAsString);
             }
 
-            if (resultBuffer.length == 1) {
+            if (resultBuffer.length === 1) {
                 resultAsInt = resultBuffer.readInt8(0);
             } else if (resultBuffer.length === 2) {
                 resultAsInt = resultBuffer.readInt16BE(0);

@@ -12,13 +12,13 @@
 
 "use strict";
 
-var R = require('ramda');
-var rx = require('rx');
-var xbee_api = require('xbee-api');
-var xbeeRx = require('../lib/xbee-rx.js');
+var R = require("ramda");
+var rx = require("rx");
+var xbee_api = require("xbee-api");
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -30,7 +30,7 @@ var xbee = xbeeRx({
 // we want to ignore the command stream result as well as any error (for no
 // reply resulting from no found nodes)
 var nodeDiscoveryCommandStream = xbee
-    .localCommand({ command: 'ND' })
+    .localCommand({ command: "ND" })
     .catch(rx.Observable.empty())
     .ignoreElements();
 
@@ -42,7 +42,7 @@ var nodeDiscoveryRepliesStream = xbee
 
 xbee
     .localCommand({
-        command: 'NT',
+        command: "NT",
     })
     .flatMap(function (ntResult) {
         // Fulfill promise when NT expires

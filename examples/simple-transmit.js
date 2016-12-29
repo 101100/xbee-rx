@@ -12,10 +12,10 @@
 
 "use strict";
 
-var xbeeRx = require('../lib/xbee-rx.js');
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -28,8 +28,8 @@ var destinationId = process.argv && process.argv[2];
 var data = process.argv && process.argv[3];
 
 if (!data || process.argv[4]) {
-    console.error('Usage:');
-    console.error(process.argv.slice(0, 2).join(' ') + ' <destination ID> <data>');
+    console.error("Usage:");
+    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID> <data>");
     process.exit(1);
 }
 

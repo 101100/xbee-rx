@@ -18,13 +18,13 @@
 
 "use strict";
 
-var moment = require('moment');
-var R = require('ramda');
-var rx = require('rx');
-var xbeeRx = require('../lib/xbee-rx.js');
+var moment = require("moment");
+var R = require("ramda");
+var rx = require("rx");
+var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -33,8 +33,8 @@ var xbee = xbeeRx({
     debug: false
 });
 
-var lastValue = undefined;
-var lastMoment = undefined;
+var lastValue;
+var lastMoment;
 
 var temperatureStream = xbee
     .monitorIODataPackets()
@@ -48,7 +48,7 @@ var meanTemperatureStream = temperatureStream
 
 meanTemperatureStream
     .where(function (value) {
-        return value !== lastValue || moment().diff(lastMoment, 'minutes') > 1;
+        return value !== lastValue || moment().diff(lastMoment, "minutes") > 1;
     })
     .do(function (value) {
         lastValue = value;

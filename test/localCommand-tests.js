@@ -14,24 +14,24 @@
 "use strict";
 
 var assert = require("assert");
-var should = require("should");
+require("should");
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    'serialport': mockserialport.MockSerialPort,
-    'xbee-api': mockXbeeApi
+    "serialport": mockserialport.MockSerialPort,
+    "xbee-api": mockXbeeApi
 });
 
-describe('xbee-rx', function () {
+describe("xbee-rx", function () {
 
     [ "802.15.4", "ZNet", "ZigBee" ].forEach(function (module) {
 
         describe("for module " + module, function () {
 
-            describe('localCommand', function () {
+            describe("localCommand", function () {
 
                 var xbee;
 
@@ -107,13 +107,13 @@ describe('xbee-rx', function () {
 
                     callRemoteCommand({
                         command: "MY",
-                        destination64: '0102030405060708',
-                        timeoutMs: 'not too long'
+                        destination64: "0102030405060708",
+                        timeoutMs: "not too long"
                     }).should.throw(/not of type 'integer'/);
 
                     callRemoteCommand({
                         command: "MY",
-                        destination64: '0102030405060708',
+                        destination64: "0102030405060708",
                         timeoutMs: -12
                     }).should.throw(/not greater than or equal with '10'/);
 
@@ -145,12 +145,12 @@ describe('xbee-rx', function () {
 
                     it("sends correct frame", function () {
 
-                        mockserialport.lastWrite.should.be.type('object');
-                        mockserialport.lastWrite.should.have.property('built', true);
-                        mockserialport.lastWrite.should.have.property('type', mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                        mockserialport.lastWrite.should.have.property('id', mockXbeeApi.lastFrameId);
-                        mockserialport.lastWrite.should.have.property('command', command);
-                        mockserialport.lastWrite.should.have.property('commandParameter', []);
+                        mockserialport.lastWrite.should.be.type("object");
+                        mockserialport.lastWrite.should.have.property("built", true);
+                        mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                        mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                        mockserialport.lastWrite.should.have.property("command", command);
+                        mockserialport.lastWrite.should.have.property("commandParameter", []);
 
                     });
 
@@ -314,4 +314,3 @@ describe('xbee-rx', function () {
     });
 
 });
-

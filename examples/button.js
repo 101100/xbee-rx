@@ -17,11 +17,11 @@
 
 "use strict";
 
-var xbeeRx = require('../lib/xbee-rx.js');
-var rx = require('rx');
+var xbeeRx = require("../lib/xbee-rx.js");
+var rx = require("rx");
 
 var xbee = xbeeRx({
-    serialport: '/dev/ttyUSB0',
+    serialport: "/dev/ttyUSB0",
     serialportOptions: {
         baudrate: 57600
     },
@@ -44,12 +44,14 @@ var buttonPressStream = xbee
     .distinctUntilChanged()
     .timeInterval()
     // the button is pressed when the button is released after being pressed for less than 1 second
-    .where(x => x.value == 1 && x.interval < 1000)
+    .where(function (x) {
+        return x.value === 1 && x.interval < 1000;
+    })
     // ignore multiple button presses within one second
     .throttle(1000);
 
 buttonPressStream
-    .subscribe(function (value) {
+    .subscribe(function () {
         console.log("Button pressed!");
     }, function (error) {
         console.log("Error during monitoring:\n", error);
