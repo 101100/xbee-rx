@@ -119,7 +119,7 @@ describe("xbee-rx", function () {
                         ];
 
                     badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/one of these properties must be used: 'destinationId,destination64,destination16'/);
+                        callRemoteCommand(settings).should.throw(/'destination16', 'destination64', or 'broadcast = true' must be specified./);
                     });
 
                 });
