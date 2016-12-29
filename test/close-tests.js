@@ -24,7 +24,7 @@ var xbeeRx = proxyquire("../lib/xbee-rx.js", {
     'xbee-api': mockXbeeApi
 });
 
-describe('xbee-promise', function () {
+describe('xbee-rx', function () {
 
     describe('close', function () {
 
