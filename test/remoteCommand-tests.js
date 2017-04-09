@@ -119,7 +119,7 @@ describe("xbee-rx", function () {
                         ];
 
                     badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/one of these properties must be used: 'destinationId,destination64,destination16'/);
+                        callRemoteCommand(settings).should.throw(/'destination16', 'destination64', or 'broadcast = true' must be specified./);
                     });
 
                 });
@@ -330,17 +330,20 @@ describe("xbee-rx", function () {
                             mockXbeeApi.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
-                                commandStatus: 0,
+                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.OK,
                                 commandData: [ 42, 16 ]
                             });
 
                         });
 
-                        it("emits 'commandData'", function (done) {
+                        it("emits whole packet", function (done) {
 
                             commandResultStream
                                 .subscribe(function (result) {
-                                    result.should.eql([ 42, 16 ]);
+                                    result.should.be.type("object");
+                                    result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                                    result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.OK);
+                                    result.should.have.property("commandData", [ 42, 16 ]);
                                 }, function () {
                                     assert.fail("Stream ended with error");
                                 }, function () {
@@ -366,20 +369,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -403,20 +404,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -425,14 +424,14 @@ describe("xbee-rx", function () {
 
                     });
 
-                    describe("with failure response frame", function () {
+                    describe("with transmit failure response frame", function () {
 
                         beforeEach(function () {
 
                             mockXbeeApi.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
-                                commandStatus: 2,
+                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
                                 commandData: []
                             });
 
@@ -520,17 +519,20 @@ describe("xbee-rx", function () {
                             mockXbeeApi.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
-                                commandStatus: 0,
-                                commandData: []
+                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.ERROR,
+                                commandData: undefined
                             });
 
                         });
 
-                        it("emits 'commandData'", function (done) {
+                        it("emits whole packet", function (done) {
 
                             commandResultStream
                                 .subscribe(function (result) {
-                                    result.should.eql([]);
+                                    result.should.be.type("object");
+                                    result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                                    result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.ERROR);
+                                    result.should.have.property("commandData", undefined);
                                 }, function () {
                                     assert.fail("Stream ended with error");
                                 }, function () {
@@ -556,20 +558,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -593,20 +593,18 @@ describe("xbee-rx", function () {
 
                         it("does not emit data, complete or error", function (done) {
 
-                            var areDone = false;
+                            var subscription;
 
                             setTimeout(function () {
-                                areDone = true;
+                                subscription.dispose();
                                 done();
                             }, 50);
 
-                            commandResultStream
+                            subscription = commandResultStream
                                 .subscribe(function () {
                                     assert.fail("Stream contained data");
                                 }, function () {
-                                    if (!areDone) {
-                                        assert.fail("Stream ended with error early");
-                                    }
+                                    assert.fail("Stream ended with error");
                                 }, function () {
                                     assert.fail("Stream completed");
                                 });
@@ -615,14 +613,14 @@ describe("xbee-rx", function () {
 
                     });
 
-                    describe("with failure response frame", function () {
+                    describe("with transmit failure response frame", function () {
 
                         beforeEach(function () {
 
                             mockXbeeApi.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
-                                commandStatus: 1,
+                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
                                 commandData: []
                             });
 
@@ -734,17 +732,20 @@ describe("xbee-rx", function () {
                                     mockXbeeApi.emitFrame({
                                         type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                         id: mockXbeeApi.lastFrameId,
-                                        commandStatus: 0,
+                                        commandStatus: 42,
                                         commandData: [ 1, 2, 3, 4 ]
                                     });
 
                                 });
 
-                                it("emits 'commandData'", function (done) {
+                                it("emits whole packet", function (done) {
 
                                     commandResultStream
                                         .subscribe(function (result) {
-                                            result.should.eql([ 1, 2, 3, 4 ]);
+                                            result.should.be.type("object");
+                                            result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                                            result.should.have.property("commandStatus", 42);
+                                            result.should.have.property("commandData", [ 1, 2, 3, 4 ]);
                                         }, function () {
                                             assert.fail("Stream ended with error");
                                         }, function () {
@@ -770,20 +771,18 @@ describe("xbee-rx", function () {
 
                                 it("does not emit data, complete or error", function (done) {
 
-                                    var areDone = false;
+                                    var subscription;
 
                                     setTimeout(function () {
-                                        areDone = true;
+                                        subscription.dispose();
                                         done();
                                     }, 50);
 
-                                    commandResultStream
+                                    subscription = commandResultStream
                                         .subscribe(function () {
                                             assert.fail("Stream contained data");
                                         }, function () {
-                                            if (!areDone) {
-                                                assert.fail("Stream ended with error early");
-                                            }
+                                            assert.fail("Stream ended with error");
                                         }, function () {
                                             assert.fail("Stream completed");
                                         });
@@ -807,20 +806,18 @@ describe("xbee-rx", function () {
 
                                 it("does not emit data, complete or error", function (done) {
 
-                                    var areDone = false;
+                                    var subscription;
 
                                     setTimeout(function () {
-                                        areDone = true;
+                                        subscription.dispose();
                                         done();
                                     }, 50);
 
-                                    commandResultStream
+                                    subscription = commandResultStream
                                         .subscribe(function () {
                                             assert.fail("Stream contained data");
                                         }, function () {
-                                            if (!areDone) {
-                                                assert.fail("Stream ended with error early");
-                                            }
+                                            assert.fail("Stream ended with error");
                                         }, function () {
                                             assert.fail("Stream completed");
                                         });
@@ -829,14 +826,14 @@ describe("xbee-rx", function () {
 
                             });
 
-                            describe("with failure remote command response frame", function () {
+                            describe("with transmit failure remote command response frame", function () {
 
                                 beforeEach(function () {
 
                                     mockXbeeApi.emitFrame({
                                         type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                         id: mockXbeeApi.lastFrameId,
-                                        commandStatus: 1,
+                                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
                                         commandData: [ 1, 2, 3, 4 ]
                                     });
 
@@ -949,20 +946,18 @@ describe("xbee-rx", function () {
 
                             it("does not emit data, complete or error", function (done) {
 
-                                var areDone = false;
+                                var subscription;
 
                                 setTimeout(function () {
-                                    areDone = true;
+                                    subscription.dispose();
                                     done();
                                 }, 50);
 
-                                commandResultStream
+                                subscription = commandResultStream
                                     .subscribe(function () {
                                         assert.fail("Stream contained data");
                                     }, function () {
-                                        if (!areDone) {
-                                            assert.fail("Stream ended with error early");
-                                        }
+                                        assert.fail("Stream ended with error");
                                     }, function () {
                                         assert.fail("Stream completed");
                                     });
@@ -986,20 +981,18 @@ describe("xbee-rx", function () {
 
                             it("does not emit data, complete or error", function (done) {
 
-                                var areDone = false;
+                                var subscription;
 
                                 setTimeout(function () {
-                                    areDone = true;
+                                    subscription.dispose();
                                     done();
                                 }, 50);
 
-                                commandResultStream
+                                subscription = commandResultStream
                                     .subscribe(function () {
                                         assert.fail("Stream contained data");
                                     }, function () {
-                                        if (!areDone) {
-                                            assert.fail("Stream ended with error early");
-                                        }
+                                        assert.fail("Stream ended with error");
                                     }, function () {
                                         assert.fail("Stream completed");
                                     });
@@ -1008,14 +1001,14 @@ describe("xbee-rx", function () {
 
                         });
 
-                        describe("with failure lookup response frame", function () {
+                        describe("with transmit failure lookup response frame", function () {
 
                             beforeEach(function () {
 
                                 mockXbeeApi.emitFrame({
                                     type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
                                     id: mockXbeeApi.lastFrameId,
-                                    commandStatus: 1,
+                                    commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
                                     commandData: [ ]
                                 });
 

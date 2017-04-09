@@ -13,6 +13,7 @@
 "use strict";
 
 var xbeeRx = require("../lib/xbee-rx.js");
+var xbee_api = require("xbee-api");
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
@@ -30,7 +31,7 @@ var commandParameter = (process.argv && process.argv[4]) || [];
 
 if (!destinationId || process.argv[5]) {
     console.error("Usage:");
-    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID> [<command>]");
+    console.error(process.argv.slice(0, 2).join(" ") + " <destination ID or *> [<command>]");
     process.exit(1);
 }
 
@@ -47,38 +48,44 @@ xbee
     .remoteCommand({
         command: command,
         commandParameter: commandParameter,
-        destinationId: destinationId
+        destinationId: destinationId !== "*" ? destinationId : undefined,
+        broadcast: destinationId === "*"
     })
-    .subscribe(function (resultBuffer) {
-        var resultAsInt,
+    .subscribe(function (result) {
+        var resultBuffer = result.commandData,
+            resultAsInt,
             resultAsString;
 
-        console.log("Command successful!");
+        console.log("Got result from:", result.remote64);
 
-        if (resultBuffer) {
-            if (resultBuffer.length === 0) {
-                console.log("Result is empty");
-            }
-            resultAsString = resultBuffer.toString();
-            if (resultAsString && !/[^\x20-\x7E]+/.test(resultAsString)) {
-                console.log("Result as string:", resultAsString);
-            }
+        if (result.commandStatus === xbee_api.constants.COMMAND_STATUS.OK) {
+            if (resultBuffer) {
+                if (resultBuffer.length === 0) {
+                    console.log("  Result is empty");
+                }
+                resultAsString = resultBuffer.toString();
+                if (resultAsString && !/[^\x20-\x7E]+/.test(resultAsString)) {
+                    console.log("  Result as string:", resultAsString);
+                }
 
-            if (resultBuffer.length === 1) {
-                resultAsInt = resultBuffer.readInt8(0);
-            } else if (resultBuffer.length === 2) {
-                resultAsInt = resultBuffer.readInt16BE(0);
-            } else if (resultBuffer.length === 4) {
-                resultAsInt = resultBuffer.readInt32BE(0);
-            }
-            if (typeof(resultAsInt) === "number") {
-                console.log("Result as integer:", resultAsInt);
+                if (resultBuffer.length === 1) {
+                    resultAsInt = resultBuffer.readInt8(0);
+                } else if (resultBuffer.length === 2) {
+                    resultAsInt = resultBuffer.readInt16BE(0);
+                } else if (resultBuffer.length === 4) {
+                    resultAsInt = resultBuffer.readInt32BE(0);
+                }
+                if (typeof(resultAsInt) === "number") {
+                    console.log("  Result as integer:", resultAsInt);
+                }
+            } else {
+                console.log("  No result buffer");
             }
         } else {
-            console.log("No result buffer");
+            console.log("  Error: " + xbee_api.constants.COMMAND_STATUS[result.commandStatus]);
         }
     }, function (e) {
-        console.log("Command failed:\n", e);
+        console.log("Command could not be sent:\n", e);
         xbee.close();
     }, function () {
         xbee.close();
