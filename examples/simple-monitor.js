@@ -13,7 +13,7 @@
 
 "use strict";
 
-var rx = require("rx");
+var rx = require("rxjs");
 var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({
@@ -31,7 +31,7 @@ console.log("Monitoring incoming packets (press CTRL-C to stop)");
 // monitor CTRL-C to close serial connection
 var stdin = process.stdin;
 stdin.setRawMode(true);
-var ctrlCStream = rx.Observable.fromEvent(stdin, "data")
+var ctrlCStream = rx.fromEvent(stdin, "data")
     .where(function monitorCtrlCOnData(data) {
         return data.length === 1 && data[0] === 0x03; // Ctrl+C
     })
@@ -58,4 +58,3 @@ transmissionsStream
         xbee.close();
         process.exit();
     });
-

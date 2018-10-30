@@ -20,7 +20,7 @@
 
 var moment = require("moment");
 var R = require("ramda");
-var rx = require("rx");
+var rx = require("rxjs");
 var xbeeRx = require("../lib/xbee-rx.js");
 
 var xbee = xbeeRx({

@@ -18,7 +18,7 @@
 "use strict";
 
 var xbeeRx = require("../lib/xbee-rx.js");
-var rx = require("rx");
+var rx = require("rxjs");
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",

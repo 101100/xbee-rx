@@ -16,6 +16,9 @@
 var assert = require("assert");
 require("should");
 
+var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
+
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
@@ -269,7 +272,7 @@ describe("xbee-rx", function () {
                         commandResultStream = xbee.remoteTransmit({
                             data: data,
                             destination64: destination64
-                        }).publishLast();
+                        }).pipe(rx.operators.publishLast());
 
                         // connect to the command stream so that it will send
                         // packets immediately
@@ -344,7 +347,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -380,7 +383,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -459,7 +462,7 @@ describe("xbee-rx", function () {
                         commandResultStream = xbee.remoteTransmit({
                             data: data,
                             destination16: destination16
-                        }).publishLast();
+                        }).pipe(rx.operators.publishLast());
 
                         // connect to the command stream so that it will send
                         // packets immediately
@@ -534,7 +537,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -570,7 +573,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -652,7 +655,7 @@ describe("xbee-rx", function () {
                             commandResultStream = xbee.remoteTransmit({
                                 data: data,
                                 destinationId: destinationId
-                            }).publishLast();
+                            }).pipe(rx.operators.publishLast());
 
                             // connect to the command stream so that it will send
                             // packets immediately
@@ -751,7 +754,7 @@ describe("xbee-rx", function () {
                                     var subscription;
 
                                     setTimeout(function () {
-                                        subscription.dispose();
+                                        subscription.unsubscribe();
                                         done();
                                     }, 50);
 
@@ -787,7 +790,7 @@ describe("xbee-rx", function () {
                                     var subscription;
 
                                     setTimeout(function () {
-                                        subscription.dispose();
+                                        subscription.unsubscribe();
                                         done();
                                     }, 50);
 
@@ -863,7 +866,7 @@ describe("xbee-rx", function () {
                                     var secondCommandStream = xbee.remoteTransmit({
                                         data: data2,
                                         destinationId: destinationId
-                                    }).publishLast();
+                                    }).pipe(rx.operators.publishLast());
 
                                     secondCommandStream.connect();
 
@@ -892,7 +895,7 @@ describe("xbee-rx", function () {
                                     var secondCommandStream = xbee.remoteTransmit({
                                         data: data,
                                         destinationId: destinationId2
-                                    }).publishLast();
+                                    }).pipe(rx.operators.publishLast());
 
                                     secondCommandStream.connect();
 
@@ -931,7 +934,7 @@ describe("xbee-rx", function () {
                                 var subscription;
 
                                 setTimeout(function () {
-                                    subscription.dispose();
+                                    subscription.unsubscribe();
                                     done();
                                 }, 50);
 
@@ -966,7 +969,7 @@ describe("xbee-rx", function () {
                                 var subscription;
 
                                 setTimeout(function () {
-                                    subscription.dispose();
+                                    subscription.unsubscribe();
                                     done();
                                 }, 50);
 

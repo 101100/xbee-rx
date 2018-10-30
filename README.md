@@ -223,10 +223,10 @@ var subscription = xbee
 ```
 
 In all cases, the subscription should be cleaned up when you are done using it by
-calling `dispose` on the subscription.
+calling `unsubscribe` on the subscription.
 
 ```javascript
-subscription.dispose();
+subscription.unsubscribe();
 ```
 
 ### Closing the connection
@@ -276,4 +276,3 @@ Future possible expansion of this module include:
 - Translating inputs and outputs of commands logically.  E.g. ATNI command should
   return a string, not an array of character codes, ATD1 (and friends) should accept
   numeric values, and not require them to be in a byte array of the correct length.
-

@@ -13,7 +13,10 @@
 "use strict";
 
 var xbeeRx = require("../lib/xbee-rx.js");
-var rx = require("rx");
+
+var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
+
 var R = require("ramda");
 
 
@@ -34,49 +37,51 @@ console.log("Blinking LED on AD1 on module with ID: ", nodeId);
 // monitor CTRL-C to close serial connection
 var stdin = process.stdin;
 stdin.setRawMode(true);
-var ctrlCStream = rx.Observable.fromEvent(stdin, "data")
-    .where(function monitorCtrlCOnData(data) {
+var ctrlCStream = rx.fromEvent(stdin, "data").pipe(
+    rx.operators.filter(function monitorCtrlCOnData(data) {
         return data.length === 1 && data[0] === 0x03; // Ctrl+C
-    })
-    .take(1);
+    }),
+    rx.operators.take(1)
+);
 
 // stream that produces alternating true/false every 2 seconds
 // (starting immediately)
-var alternatingTrueFalse = rx.Observable.timer(0, 2000)
-    .map(R.modulo(R.__, 2))
-    .map(R.eq(0));
+var alternatingTrueFalse = rx.timer(0, 2000).pipe(
+    rx.operators.map(R.modulo(R.__, 2)),
+    rx.operators.map(R.eq(0))
+);
 
 // stream indicating we're ready for the next blink (to prevent
 // multiple commands "in the air" at the same time)
 var readyStream = new rx.Subject();
 
-rx.Observable.zip(alternatingTrueFalse, readyStream, R.identity)
-    .takeUntil(ctrlCStream)
-    .flatMap(function (onNext) {
-        process.stdout.write("Turning LED " + (onNext ? "ON." : "OFF") + "...");
+rx.zip(alternatingTrueFalse, readyStream, R.identity).pipe(
+    rx.operators.takeUntil(ctrlCStream),
+    rx.operators.mergeMap(function(next) {
+        process.stdout.write("Turning LED " + (next ? "ON." : "OFF") + "...");
 
         return xbee.remoteCommand({
             command: "D1",
-            commandParameter: [ onNext ? 5 : 4 ],
+            commandParameter: [ next ? 5 : 4 ],
             destinationId: nodeId
         });
     })
-    .subscribe(
-        function () {
-            console.log(" success.");
-            readyStream.onNext(true);
-        },
-        function (err) {
-            console.log(" command failed:\n", err);
-            xbee.close();
-            process.exit();
-        },
-        function () {
-            console.log("All done!");
-            xbee.close();
-            process.exit();
-        }
-    );
+).subscribe(
+    function () {
+        console.log(" success.");
+        readyStream.next(true);
+    },
+    function (err) {
+        console.log(" command failed:\n", err);
+        xbee.close();
+        process.exit();
+    },
+    function () {
+        console.log("All done!");
+        xbee.close();
+        process.exit();
+    }
+);
 
 // kick-start first LED command
-readyStream.onNext(true);
+readyStream.next(true);

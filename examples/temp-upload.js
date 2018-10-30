@@ -19,7 +19,7 @@
 "use strict";
 
 var R = require("ramda");
-var rx = require("rx");
+var rx = require("rxjs");
 var request = require("request");
 var xbeeRx = require("../lib/xbee-rx.js");
 
@@ -98,4 +98,3 @@ meanTemperatureStream
         console.log("Monitoring stream ended; exiting.");
         xbee.close();
     });
-

@@ -13,7 +13,7 @@
 "use strict";
 
 var R = require("ramda");
-var rx = require("rx");
+var rx = require("rxjs");
 var xbee_api = require("xbee-api");
 var xbeeRx = require("../lib/xbee-rx.js");
 
@@ -62,4 +62,3 @@ xbee
         console.log("Timeout reached; done finding nodes");
         xbee.close();
     });
-

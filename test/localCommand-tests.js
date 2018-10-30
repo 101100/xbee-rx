@@ -16,6 +16,9 @@
 var assert = require("assert");
 require("should");
 
+var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
+
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
@@ -128,7 +131,7 @@ describe("xbee-rx", function () {
 
                         commandResultStream = xbee.localCommand({
                             command: command
-                        }).publishLast();
+                        }).pipe(rx.operators.publishLast());
 
                         // connect to the command stream so that it will send
                         // packets immediately
@@ -200,7 +203,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -235,7 +238,7 @@ describe("xbee-rx", function () {
                             var subscription;
 
                             setTimeout(function () {
-                                subscription.dispose();
+                                subscription.unsubscribe();
                                 done();
                             }, 50);
 
@@ -310,4 +313,3 @@ describe("xbee-rx", function () {
     });
 
 });
-
