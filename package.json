@@ -26,7 +26,7 @@
     "url": "https://github.com/101100/xbee-rx/issues"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4"
   },
   "dependencies": {
     "grunt-contrib-jshint": "^1.1.0",
