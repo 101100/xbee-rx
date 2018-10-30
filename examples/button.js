@@ -18,7 +18,9 @@
 "use strict";
 
 var xbeeRx = require("../lib/xbee-rx.js");
+
 var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
@@ -30,25 +32,25 @@ var xbee = xbeeRx({
     debug: false
 });
 
-var buttonPressStream = xbee
-    .monitorIODataPackets()
-    // ignore any packets at program startup
-    .skipUntil(rx.Observable.timer(100))
-    // extract just the DIO1 sample (1 (released) or 0 (pressed))
-    .pluck("digitalSamples", "DIO1")
-    // pluck results in undefined if the sample doesn't exist, so filter that out
-    .where(function (sample) {
-        return sample !== undefined;
-    })
-    // ignore any repeats
-    .distinctUntilChanged()
-    .timeInterval()
-    // the button is pressed when the button is released after being pressed for less than 1 second
-    .where(function (x) {
-        return x.value === 1 && x.interval < 1000;
-    })
-    // ignore multiple button presses within one second
-    .throttle(1000);
+var buttonPressStream = xbee.monitorIODataPackets().pipe(
+        // ignore any packets at program startup
+        rx.operators.skipUntil(rx.timer(100)),
+        // extract just the DIO1 sample (1 (released) or 0 (pressed))
+        rx.operators.pluck("digitalSamples", "DIO1"),
+        // pluck results in undefined if the sample doesn't exist, so filter that out
+        rx.operators.filter(function (sample) {
+            return sample !== undefined;
+        }),
+        // ignore any repeats
+        rx.operators.distinctUntilChanged(),
+        rx.operators.timeInterval(),
+        // the button is pressed when the button is released after being pressed for less than 1 second
+        rx.operators.filter(function (x) {
+            return x.value === 1 && x.interval < 1000;
+        }),
+        // ignore multiple button presses within one second
+        rx.operators.throttle(1000)
+    );
 
 buttonPressStream
     .subscribe(function () {

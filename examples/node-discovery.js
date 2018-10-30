@@ -13,7 +13,10 @@
 "use strict";
 
 var R = require("ramda");
+
 var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
+
 var xbee_api = require("xbee-api");
 var xbeeRx = require("../lib/xbee-rx.js");
 
@@ -29,30 +32,35 @@ var xbee = xbeeRx({
 
 // we want to ignore the command stream result as well as any error (for no
 // reply resulting from no found nodes)
-var nodeDiscoveryCommandStream = xbee
-    .localCommand({ command: "ND" })
-    .catch(rx.Observable.empty())
-    .ignoreElements();
+var nodeDiscoveryCommandStream = xbee.localCommand({ command: "ND" }).pipe(
+    rx.operators.catchError(function() {
+        return rx.empty();
+    }),
+    rx.operators.ignoreElements()
+);
 
-var nodeDiscoveryRepliesStream = xbee
-    .allPackets
-    .where(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE))
-    .where(R.propEq("command", "ND"))
-    .pluck("nodeIdentification");
+var nodeDiscoveryRepliesStream = xbee.allPackets.pipe(
+    rx.operators.filter(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE)),
+    rx.operators.filter(R.propEq("command", "ND")),
+    rx.operators.pluck("nodeIdentification")
+);
 
 xbee
     .localCommand({
         command: "NT",
     })
-    .flatMap(function (ntResult) {
-        // Fulfill promise when NT expires
-        // NT is 1/10 seconds
-        var timeoutMs = ntResult.readInt16BE(0) * 100;
-        console.log("Got node discovery timeout:", timeoutMs, "ms");
-        return nodeDiscoveryRepliesStream
-            .takeUntil(rx.Observable.timer(timeoutMs + 1000))
-            .merge(nodeDiscoveryCommandStream);
-    })
+    .pipe(
+        rx.operators.flatMap(function (ntResult) {
+            // Fulfill promise when NT expires
+            // NT is 1/10 seconds
+            var timeoutMs = ntResult.readInt16BE(0) * 100;
+            console.log("Got node discovery timeout:", timeoutMs, "ms");
+            return nodeDiscoveryRepliesStream.pipe(
+                rx.operators.takeUnitl(rx.timer(timeoutMs + 1000)),
+                rx.operators.merge(nodeDiscoveryCommandStream)
+            );
+        })
+    )
     .subscribe(function (nodeIdentification) {
         console.log("Found node:\n", nodeIdentification);
     }, function (e) {
