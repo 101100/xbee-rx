@@ -18,8 +18,6 @@
 
 "use strict";
 
-var R = require("ramda");
-
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
 
@@ -60,6 +58,14 @@ function xivelyPost(feedId, streamId, apiKey, currentValue) {
     return requestPut(options);
 }
 
+function computeMean(samples) {
+    if (samples.length === 0) {
+        return 0;
+    }
+
+    return samples.reduce(function(a, b) { return a + b; }) / samples.length;
+}
+
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
@@ -82,7 +88,7 @@ var temperatureStream = xbee.monitorIODataPackets().pipe(
 
 var meanTemperatureStream = temperatureStream.pipe(
     rx.operators.buffer(function () { return rx.timer(60000); }), // collect 60 seconds of packets
-    rx.operators.map(R.mean), // compute the mean of the collected samples
+    rx.operators.map(computeMean), // compute the mean of the collected samples
     rx.operators.map(function (value) { return Math.round(value * 10) / 10; }) // round to 1 decimal place
 );
 

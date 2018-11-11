@@ -29,22 +29,21 @@
     "node": ">= 4"
   },
   "dependencies": {
-    "grunt-contrib-jshint": "^1.1.0",
     "parambulator": "^1.5",
-    "ramda": "^0.22",
     "rxjs": "^6.3.3",
     "serialport": "^6.0",
-    "xbee-api": "^0.5.1"
+    "xbee-api": "^0.6.0"
   },
   "devDependencies": {
     "grunt": "^1.0",
     "grunt-cli": "^1.2",
+    "grunt-contrib-jshint": "^2.0.0",
     "grunt-contrib-watch": "^1.0",
     "grunt-simple-mocha": "^0.4",
     "moment": "^2.10",
-    "proxyquire": "^1.6",
+    "proxyquire": "^2.1.0",
     "request": "^2.61",
-    "should": "^11.1"
+    "should": "^13.2.3"
   },
   "scripts": {
     "test": "grunt test",

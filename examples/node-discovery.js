@@ -12,8 +12,6 @@
 
 "use strict";
 
-var R = require("ramda");
-
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
 
@@ -40,8 +38,7 @@ var nodeDiscoveryCommandStream = xbee.localCommand({ command: "ND" }).pipe(
 );
 
 var nodeDiscoveryRepliesStream = xbee.allPackets.pipe(
-    rx.operators.filter(R.propEq("type", xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE)),
-    rx.operators.filter(R.propEq("command", "ND")),
+    rx.operators.filter(function (packet) { return packet.type === xbee_api.constants.FRAME_TYPE.AT_COMMAND_RESPONSE && packet.command === "ND"; }),
     rx.operators.pluck("nodeIdentification")
 );
 

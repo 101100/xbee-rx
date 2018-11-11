@@ -17,8 +17,6 @@ var xbeeRx = require("../lib/xbee-rx.js");
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
 
-var R = require("ramda");
-
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
@@ -47,15 +45,14 @@ var ctrlCStream = rx.fromEvent(stdin, "data").pipe(
 // stream that produces alternating true/false every 2 seconds
 // (starting immediately)
 var alternatingTrueFalse = rx.timer(0, 2000).pipe(
-    rx.operators.map(R.modulo(R.__, 2)),
-    rx.operators.map(R.eq(0))
+    rx.operators.map(function (i) { return i % 2 === 0; })
 );
 
 // stream indicating we're ready for the next blink (to prevent
 // multiple commands "in the air" at the same time)
 var readyStream = new rx.Subject();
 
-rx.zip(alternatingTrueFalse, readyStream, R.identity).pipe(
+rx.zip(alternatingTrueFalse, readyStream).pipe(
     rx.operators.takeUntil(ctrlCStream),
     rx.operators.mergeMap(function(next) {
         process.stdout.write("Turning LED " + (next ? "ON." : "OFF") + "...");
