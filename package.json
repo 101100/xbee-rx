@@ -1,6 +1,6 @@
 {
   "name": "xbee-rx",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "description": "Reactive extensions library for XBee wireless modules based on xbee-api",
   "author": {
     "name": "Jason Heard",
@@ -26,25 +26,24 @@
     "url": "https://github.com/101100/xbee-rx/issues"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 4"
   },
   "dependencies": {
-    "grunt-contrib-jshint": "^1.1.0",
     "parambulator": "^1.5",
-    "ramda": "^0.22",
-    "rx": "^4.1",
-    "serialport": "^4.0",
-    "xbee-api": "^0.5.1"
+    "rxjs": "^6.3.3",
+    "serialport": "^6.0",
+    "xbee-api": "^0.6.0"
   },
   "devDependencies": {
     "grunt": "^1.0",
     "grunt-cli": "^1.2",
+    "grunt-contrib-jshint": "^2.0.0",
     "grunt-contrib-watch": "^1.0",
     "grunt-simple-mocha": "^0.4",
     "moment": "^2.10",
-    "proxyquire": "^1.6",
+    "proxyquire": "^2.1.0",
     "request": "^2.61",
-    "should": "^11.1"
+    "should": "^13.2.3"
   },
   "scripts": {
     "test": "grunt test",

@@ -19,9 +19,19 @@
 "use strict";
 
 var moment = require("moment");
-var R = require("ramda");
-var rx = require("rx");
+
+var rx = require("rxjs");
+rx.operators = require("rxjs/operators");
+
 var xbeeRx = require("../lib/xbee-rx.js");
+
+function computeMean(samples) {
+    if (samples.length === 0) {
+        return 0;
+    }
+
+    return samples.reduce(function(a, b) { return a + b; }) / samples.length;
+}
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
@@ -36,30 +46,31 @@ var xbee = xbeeRx({
 var lastValue;
 var lastMoment;
 
-var temperatureStream = xbee
-    .monitorIODataPackets()
-    .pluck("analogSamples", "AD0") // extract just the AD0 sample (in millivolts)
-    .map(function (mv) { return (mv - 500) / 10; }); // convert millivolts to Centigrade
+var temperatureStream = xbee.monitorIODataPackets().pipe(
+    rx.operators.pluck("analogSamples", "AD0"), // extract just the AD0 sample (in millivolts)
+    rx.operators.map(function (mv) { return (mv - 500) / 10; }) // convert millivolts to Centigrade
+);
 
-var meanTemperatureStream = temperatureStream
-    .buffer(function () { return rx.Observable.timer(10000); }) // collect 10 seconds of packets
-    .map(R.mean) // compute the mean of the collected samples
-    .map(function (value) { return Math.round(value * 10) / 10; }); // round to 1 decimal place
+var meanTemperatureStream = temperatureStream.pipe(
+    rx.operators.buffer(function () { return rx.timer(60000); }), // collect 60 seconds of packets
+    rx.operators.map(computeMean), // compute the mean of the collected samples
+    rx.operators.map(function (value) { return Math.round(value * 10) / 10; }) // round to 1 decimal place
+);
 
-meanTemperatureStream
-    .where(function (value) {
+meanTemperatureStream.pipe(
+    rx.operators.filter(function (value) {
         return value !== lastValue || moment().diff(lastMoment, "minutes") > 1;
-    })
-    .do(function (value) {
+    }),
+    rx.operators.tap(function (value) {
         lastValue = value;
         lastMoment = moment();
     })
-    .subscribe(function (value) {
-        console.log(new Date(), "temperature:", value);
-    }, function (error) {
-        console.log("Error during monitoring:\n", error);
-        xbee.close();
-    }, function () {
-        console.log("Monitoring stream ended; exiting.");
-        xbee.close();
-    });
+).subscribe(function (value) {
+    console.log(new Date(), "temperature:", value);
+}, function (error) {
+    console.log("Error during monitoring:\n", error);
+    xbee.close();
+}, function () {
+    console.log("Monitoring stream ended; exiting.");
+    xbee.close();
+});
