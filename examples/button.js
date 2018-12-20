@@ -21,12 +21,13 @@ var xbeeRx = require("../lib/xbee-rx.js");
 
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
+var SerialPort = require("serialport");
 
 var xbee = xbeeRx({
-    serialport: "/dev/ttyUSB0",
-    serialportOptions: {
+    serialport: new SerialPort("/dev/ttyUSB0",
+    {
         baudrate: 57600
-    },
+    }),
     module: "ZigBee",
     // turn on debugging to see what the library is doing
     debug: false
