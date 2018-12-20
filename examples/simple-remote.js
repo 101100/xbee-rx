@@ -12,13 +12,17 @@
 
 "use strict";
 
-var xbeeRx = require("../lib/xbee-rx.js");
 var xbee_api = require("xbee-api");
+
+var xbeeRx = require("../lib/xbee-rx.js");
+
+var shared = require("./shared.js");
+
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee",
     // turn on debugging to see what the library is doing
@@ -52,35 +56,10 @@ xbee
         broadcast: destinationId === "*"
     })
     .subscribe(function (result) {
-        var resultBuffer = result.commandData,
-            resultAsInt,
-            resultAsString;
-
         console.log("Got result from:", result.remote64);
 
         if (result.commandStatus === xbee_api.constants.COMMAND_STATUS.OK) {
-            if (resultBuffer) {
-                if (resultBuffer.length === 0) {
-                    console.log("  Result is empty");
-                }
-                resultAsString = resultBuffer.toString();
-                if (resultAsString && !/[^\x20-\x7E]+/.test(resultAsString)) {
-                    console.log("  Result as string:", resultAsString);
-                }
-
-                if (resultBuffer.length === 1) {
-                    resultAsInt = resultBuffer.readInt8(0);
-                } else if (resultBuffer.length === 2) {
-                    resultAsInt = resultBuffer.readInt16BE(0);
-                } else if (resultBuffer.length === 4) {
-                    resultAsInt = resultBuffer.readInt32BE(0);
-                }
-                if (typeof(resultAsInt) === "number") {
-                    console.log("  Result as integer:", resultAsInt);
-                }
-            } else {
-                console.log("  No result buffer");
-            }
+            shared.printResult(result.commandData, "  ");
         } else {
             console.log("  Error: " + xbee_api.constants.COMMAND_STATUS[result.commandStatus]);
         }

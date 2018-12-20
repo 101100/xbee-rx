@@ -28,7 +28,7 @@ it is connected to.  On Windows, this typically has the form `COMx`, where `x` i
 a number.  On unix and OS X machines, this will typically be `/dev/tty???`, where
 `???` can be anything from `USB0` to `.usbserial-A4013E5P`. In addition, you will
 need to make sure that the module connected to your machine is in API mode and that
-you know the baudrate it is set to.  By default, the baudrate is 57600 when API
+you know the baud rate it is set to.  By default, the baud rate is 57600 when API
 mode is used.  In addition, you will need to know if you are using a ZigBee module,
 a ZNet module or a 802.15.4 module.  These are sometimes referred to as series 2 for
 ZigBee or series 1 for 802.15.4.  (Currently there are no differences in how this
@@ -42,7 +42,7 @@ var xbeeRx = require('xbee-rx');
 var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
     serialPortOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee"
 });

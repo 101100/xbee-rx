@@ -14,10 +14,13 @@
 
 var xbeeRx = require("../lib/xbee-rx.js");
 
+var shared = require("./shared.js");
+
+
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee",
     // turn on debugging to see what the library is doing
@@ -48,33 +51,9 @@ xbee
         commandParameter: commandParameter
     })
     .subscribe(function (resultBuffer) {
-        var resultAsInt,
-            resultAsString;
-
         console.log("Command successful!");
 
-        if (resultBuffer) {
-            if (resultBuffer.length === 0) {
-                console.log("Result is empty");
-            }
-            resultAsString = resultBuffer.toString();
-            if (resultAsString && !/[^\x20-\x7E]+/.test(resultAsString)) {
-                console.log("Result as string:", resultAsString);
-            }
-
-            if (resultBuffer.length === 1) {
-                resultAsInt = resultBuffer.readInt8(0);
-            } else if (resultBuffer.length === 2) {
-                resultAsInt = resultBuffer.readInt16BE(0);
-            } else if (resultBuffer.length === 4) {
-                resultAsInt = resultBuffer.readInt32BE(0);
-            }
-            if (typeof(resultAsInt) === "number") {
-                console.log("Result as integer:", resultAsInt);
-            }
-        } else {
-            console.log("No result buffer");
-        }
+        shared.printResult(resultBuffer);
     }, function (e) {
         console.log("Command failed:\n", e);
         xbee.close();
