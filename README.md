@@ -167,9 +167,12 @@ xbee.remoteCommand({
 
 ### Remote transmission
 
-Remote commands may be performed using the `remoteTransmit` fuction.  The destination
-is set in the same manner as for remote commands.  The text to send is given with
-the `data` parameter.
+Data may be transmitted using the `remoteTransmit` fuction.  The destination is
+set in the same manner as for remote commands.  The text to send is given with
+the `data` parameter.  The resulting stream contains a single `true` value if
+the data was sent out or an error result if the node does not respond or
+responds with an error.  If you want to capture a response from another node,
+you will need to make use of `monitorTransmissions` or `allPackets`.
 
 ```javascript
 xbee.remoteTransmit({
