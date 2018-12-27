@@ -30,1028 +30,1006 @@ var xbeeRx = proxyquire("../lib/xbee-rx.js", {
 
 describe("xbee-rx", function () {
 
-    [ "802.15.4", "ZNet", "ZigBee" ].forEach(function (module) {
+    describe("remoteCommand with module '802.15.4'", function () {
 
-        describe("for module " + module, function () {
+        it("fails with 'destinationId' parameter", function () {
+            var xbee = xbeeRx({
+                serialport: "serialport path",
+                module: "802.15.4",
+                defaultTimeoutMs: 100
+            });
 
-            describe("remoteCommand", function () {
+            function callRemoteCommand(params) {
+                return function () {
+                    return xbee.remoteCommand(params);
+                };
+            }
 
-                var xbee;
+            callRemoteCommand({
+                command: "MY",
+                destinationId: "Bob"
+            }).should.throw(/'destinationId' is not supported by 802.15.4 modules/);
+
+        });
+
+    });
+
+    describe("remoteCommand", function () {
+
+        var xbee;
+
+        beforeEach(function () {
+            xbee = xbeeRx({
+                serialport: "serialport path",
+                module: "ZigBee",
+                defaultTimeoutMs: 100
+            });
+        });
+
+        function callRemoteCommand(params) {
+            return function () {
+                return xbee.remoteCommand(params);
+            };
+        }
+
+        it("fails with non-object options parameter", function () {
+
+            var badSettings = [ undefined, null, "string", true, 42 ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/property 'command' is missing/);
+            });
+
+        });
+
+        it("fails with missing 'command' options parameter", function () {
+
+            var badSettings = [
+                    {
+                        destination16: "0102"
+                    },
+                    {
+                        destination64: "0102030405060708",
+                        test: "fail!"
+                    },
+                    {
+                        destinationId: "NODE",
+                        other: "stuff"
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/property 'command' is missing/);
+            });
+
+        });
+
+        it("fails with invalid 'command' options parameter", function () {
+
+            var badSettings = [
+                    {
+                        command: "TOO LONG",
+                        destination16: "0102"
+                    },
+                    {
+                        command: [ 0x67, 0x69 ],
+                        destination64: "0102030405060708",
+                        test: "fail!"
+                    },
+                    {
+                        command: {},
+                        destinationId: "NODE",
+                        other: "stuff"
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/'command'.*must be a string/);
+            });
+
+        });
+
+        it("fails with no destination options parameter", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY"
+                    },
+                    {
+                        command: "D1",
+                        commandParameter: [ 5 ]
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/'destination16', 'destination64', or 'broadcast = true' must be specified./);
+            });
+
+        });
+
+        it("fails with 'destination64' options parameter of wrong type", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY",
+                        destination64: {}
+                    },
+                    {
+                        command: "MY",
+                        destination64: 42
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/is not of type 'string,array'/);
+            });
+
+        });
+
+        it("fails with bad 'destination64' options parameter", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY",
+                        destination64: "0102"
+                    },
+                    {
+                        command: "MY",
+                        destination64: "not hex but 16 !"
+                    },
+                    {
+                        command: "MY",
+                        destination64: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+                    },
+                    {
+                        command: "MY",
+                        destination64: [ "not", "bytes", 3, 4, 5, 6, 7, 8 ]
+                    },
+                    {
+                        command: "MY",
+                        destination64: [ 256, 2, 3, 4, 5, 6, 7, 8 ]
+                    },
+                    {
+                        command: "MY",
+                        destination64: [ -1, 2, 3, 4, 5, 6, 7, 8 ]
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/'destination64'.* must be a hex string of length 16 or a byte array of length 8/);
+            });
+
+        });
+
+        it("fails with 'destination16' options parameter of wrong type", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY",
+                        destination16: {}
+                    },
+                    {
+                        command: "MY",
+                        destination16: 42
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/is not of type 'string,array'/);
+            });
+
+        });
+
+        it("fails with bad 'destination16' options parameter", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY",
+                        destination16: "01020304"
+                    },
+                    {
+                        command: "MY",
+                        destination16: "nohx"
+                    },
+                    {
+                        command: "MY",
+                        destination16: [ 1 ]
+                    },
+                    {
+                        command: "MY",
+                        destination16: [ "not", "bytes" ]
+                    },
+                    {
+                        command: "MY",
+                        destination16: [ 256, 2 ]
+                    },
+                    {
+                        command: "MY",
+                        destination16: [ -1, 2, 3, 4, 5, 6, 7, 8 ]
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/'destination16'.* must be a hex string of length 4 or a byte array of length 2/);
+            });
+
+        });
+
+        it("fails with invalid 'destinationId' parameter", function () {
+
+            var badSettings = [
+                    {
+                        command: "MY",
+                        destinationId: {}
+                    },
+                    {
+                        command: "MY",
+                        destinationId: 42
+                    },
+                    {
+                        command: "MY",
+                        destinationId: ["array", "no", "good!"]
+                    }
+                ];
+
+            badSettings.forEach(function (settings) {
+                callRemoteCommand(settings).should.throw(/is not of type 'string'/);
+            });
+
+        });
+
+        it("fails with invalid 'timeoutMs' parameter", function () {
+
+            callRemoteCommand({
+                command: "MY",
+                destination64: "0102030405060708",
+                timeoutMs: "not too long"
+            }).should.throw(/not of type 'integer'/);
+
+            callRemoteCommand({
+                command: "MY",
+                destination64: "0102030405060708",
+                timeoutMs: -12
+            }).should.throw(/not greater than or equal with '10'/);
+
+        });
+
+        describe("using destination64", function () {
+
+            var command = "MY",
+                destination64 = "0102030405060708",
+                commandResultStream;
+
+            beforeEach(function () {
+
+                commandResultStream = xbee.remoteCommand({
+                    destination64: destination64,
+                    command: command
+                }).pipe(rx.operators.publishLast());
+
+                // connect to the command stream so that it will send
+                // packets immediately
+                commandResultStream.connect();
+
+            });
+
+            it("sends correct frame", function () {
+
+                mockSerialport.lastWrite.should.be.type("object");
+                mockSerialport.lastWrite.should.have.property("built", true);
+                mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                mockSerialport.lastWrite.should.have.property("command", command);
+                mockSerialport.lastWrite.should.have.property("commandParameter", []);
+                mockSerialport.lastWrite.should.have.property("destination64", destination64);
+                mockSerialport.lastWrite.should.have.property("destination16", undefined);
+
+            });
+
+            describe("with success response frame", function () {
 
                 beforeEach(function () {
-                    xbee = xbeeRx({
-                        serialport: "serialport path",
-                        module: module,
-                        defaultTimeoutMs: 100
-                    });
-                });
 
-                function callRemoteCommand(params) {
-                    return function () {
-                        return xbee.remoteCommand(params);
-                    };
-                }
-
-                it("fails with non-object options parameter", function () {
-
-                    var badSettings = [ undefined, null, "string", true, 42 ];
-
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/property 'command' is missing/);
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.OK,
+                        commandData: [ 42, 16 ]
                     });
 
                 });
 
-                it("fails with missing 'command' options parameter", function () {
+                it("emits whole packet", function (done) {
 
-                    var badSettings = [
-                            {
-                                destination16: "0102"
-                            },
-                            {
-                                destination64: "0102030405060708",
-                                test: "fail!"
-                            },
-                            {
-                                destinationId: "NODE",
-                                other: "stuff"
-                            }
-                        ];
+                    commandResultStream
+                        .subscribe(function (result) {
+                            result.should.be.type("object");
+                            result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                            result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.OK);
+                            result.should.have.property("commandData", [ 42, 16 ]);
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            done();
+                        });
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/property 'command' is missing/);
+                });
+
+            });
+
+            describe("with non-matching response frame (wrong id)", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId + 42,
+                        commandStatus: 0,
+                        commandData: [ 42, 16 ]
                     });
 
                 });
 
-                it("fails with invalid 'command' options parameter", function () {
+                it("does not emit data, complete or error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "TOO LONG",
-                                destination16: "0102"
-                            },
-                            {
-                                command: [ 0x67, 0x69 ],
-                                destination64: "0102030405060708",
-                                test: "fail!"
-                            },
-                            {
-                                command: {},
-                                destinationId: "NODE",
-                                other: "stuff"
-                            }
-                        ];
+                    var subscription;
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/'command'.*must be a string/);
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with non-matching response frame (wrong type)", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: 0,
+                        commandData: [ 42, 16 ]
                     });
 
                 });
 
-                it("fails with no destination options parameter", function () {
+                it("does not emit data, complete or error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY"
-                            },
-                            {
-                                command: "D1",
-                                commandParameter: [ 5 ]
-                            }
-                        ];
+                    var subscription;
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/'destination16', 'destination64', or 'broadcast = true' must be specified./);
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with transmit failure response frame", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
+                        commandData: []
                     });
 
                 });
 
-                it("fails with 'destination64' options parameter of wrong type", function () {
+                it("ends stream with error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY",
-                                destination64: {}
-                            },
-                            {
-                                command: "MY",
-                                destination64: 42
-                            }
-                        ];
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.be.type("string");
+                            done();
+                        });
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/is not of type 'string,array'/);
+                });
+
+            });
+
+            describe("with no response frame", function () {
+
+                it("ends stream with error", function (done) {
+
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.match(/Timed out after 100 ms/);
+                            done();
+                        });
+
+                });
+
+            });
+
+        });
+
+        describe("using destination16", function () {
+
+            var command = "NI",
+                destination16 = [ 1, 2 ],
+                commandParameter = "NODELY",
+                commandResultStream;
+
+            beforeEach(function () {
+
+                commandResultStream = xbee.remoteCommand({
+                    destination16: destination16,
+                    command: command,
+                    commandParameter: commandParameter
+                }).pipe(rx.operators.publishLast());
+
+                // connect to the command stream so that it will send
+                // packets immediately
+                commandResultStream.connect();
+
+            });
+
+            it("sends correct frame", function () {
+
+                mockSerialport.lastWrite.should.be.type("object");
+                mockSerialport.lastWrite.should.have.property("built", true);
+                mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                mockSerialport.lastWrite.should.have.property("command", command);
+                mockSerialport.lastWrite.should.have.property("commandParameter", commandParameter);
+                mockSerialport.lastWrite.should.have.property("destination64", undefined);
+                mockSerialport.lastWrite.should.have.property("destination16", destination16);
+
+            });
+
+            describe("with success response frame", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.ERROR,
+                        commandData: undefined
                     });
 
                 });
 
-                it("fails with bad 'destination64' options parameter", function () {
+                it("emits whole packet", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY",
-                                destination64: "0102"
-                            },
-                            {
-                                command: "MY",
-                                destination64: "not hex but 16 !"
-                            },
-                            {
-                                command: "MY",
-                                destination64: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
-                            },
-                            {
-                                command: "MY",
-                                destination64: [ "not", "bytes", 3, 4, 5, 6, 7, 8 ]
-                            },
-                            {
-                                command: "MY",
-                                destination64: [ 256, 2, 3, 4, 5, 6, 7, 8 ]
-                            },
-                            {
-                                command: "MY",
-                                destination64: [ -1, 2, 3, 4, 5, 6, 7, 8 ]
-                            }
-                        ];
+                    commandResultStream
+                        .subscribe(function (result) {
+                            result.should.be.type("object");
+                            result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                            result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.ERROR);
+                            result.should.have.property("commandData", undefined);
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            done();
+                        });
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/'destination64'.* must be a hex string of length 16 or a byte array of length 8/);
+                });
+
+            });
+
+            describe("with non-matching response frame (wrong id)", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId + 42,
+                        commandStatus: 0,
+                        commandData: []
                     });
 
                 });
 
-                it("fails with 'destination16' options parameter of wrong type", function () {
+                it("does not emit data, complete or error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY",
-                                destination16: {}
-                            },
-                            {
-                                command: "MY",
-                                destination16: 42
-                            }
-                        ];
+                    var subscription;
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/is not of type 'string,array'/);
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with non-matching response frame (wrong type)", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: 0,
+                        commandData: []
                     });
 
                 });
 
-                it("fails with bad 'destination16' options parameter", function () {
+                it("does not emit data, complete or error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY",
-                                destination16: "01020304"
-                            },
-                            {
-                                command: "MY",
-                                destination16: "nohx"
-                            },
-                            {
-                                command: "MY",
-                                destination16: [ 1 ]
-                            },
-                            {
-                                command: "MY",
-                                destination16: [ "not", "bytes" ]
-                            },
-                            {
-                                command: "MY",
-                                destination16: [ 256, 2 ]
-                            },
-                            {
-                                command: "MY",
-                                destination16: [ -1, 2, 3, 4, 5, 6, 7, 8 ]
-                            }
-                        ];
+                    var subscription;
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/'destination16'.* must be a hex string of length 4 or a byte array of length 2/);
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with transmit failure response frame", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
+                        commandData: []
                     });
 
                 });
 
-                it("fails with invalid 'destinationId' parameter", function () {
+                it("ends stream with error", function (done) {
 
-                    var badSettings = [
-                            {
-                                command: "MY",
-                                destinationId: {}
-                            },
-                            {
-                                command: "MY",
-                                destinationId: 42
-                            },
-                            {
-                                command: "MY",
-                                destinationId: ["array", "no", "good!"]
-                            }
-                        ];
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.be.type("string");
+                            done();
+                        });
 
-                    badSettings.forEach(function (settings) {
-                        callRemoteCommand(settings).should.throw(/is not of type 'string'/);
+                });
+
+            });
+
+            describe("with no response frame", function () {
+
+                it("ends stream with error", function (done) {
+
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.match(/Timed out after 100 ms/);
+                            done();
+                        });
+
+                });
+
+            });
+
+        });
+
+        describe("using destinationId", function () {
+
+            var command = "SH",
+                destinationId = "TESTNODE",
+                commandResultStream;
+
+            beforeEach(function () {
+
+                commandResultStream = xbee.remoteCommand({
+                    destinationId: destinationId,
+                    command: command
+                }).pipe(rx.operators.publishLast());
+
+                // connect to the command stream so that it will send
+                // packets immediately
+                commandResultStream.connect();
+
+            });
+
+            it("sends lookup frame", function () {
+
+                mockSerialport.lastWrite.should.be.type("object");
+                mockSerialport.lastWrite.should.have.property("built", true);
+                mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                mockSerialport.lastWrite.should.have.property("command", "DN");
+                mockSerialport.lastWrite.should.have.property("commandParameter", destinationId);
+
+            });
+
+            describe("with lookup success response frame", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: 0,
+                        commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
                     });
 
                 });
 
-                if (module === "802.15.4") {
+                it("sends remote command frame", function () {
 
-                    it("fails with 'destinationId' parameter", function () {
-
-                        callRemoteCommand({
-                            command: "MY",
-                            destinationId: "Bob"
-                        }).should.throw(/'destinationId' is not supported by 802.15.4 modules/);
-
-                    });
-
-                }
-
-                it("fails with invalid 'timeoutMs' parameter", function () {
-
-                    callRemoteCommand({
-                        command: "MY",
-                        destination64: "0102030405060708",
-                        timeoutMs: "not too long"
-                    }).should.throw(/not of type 'integer'/);
-
-                    callRemoteCommand({
-                        command: "MY",
-                        destination64: "0102030405060708",
-                        timeoutMs: -12
-                    }).should.throw(/not greater than or equal with '10'/);
+                    mockSerialport.lastWrite.should.be.type("object");
+                    mockSerialport.lastWrite.should.have.property("built", true);
+                    mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                    mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                    mockSerialport.lastWrite.should.have.property("command", command);
+                    mockSerialport.lastWrite.should.have.property("commandParameter", []);
+                    mockSerialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
+                    mockSerialport.lastWrite.should.have.property("destination16", undefined);
 
                 });
 
-                describe("using destination64", function () {
-
-                    var command = "MY",
-                        destination64 = "0102030405060708",
-                        commandResultStream;
+                describe("with remote command success response frame", function () {
 
                     beforeEach(function () {
 
-                        commandResultStream = xbee.remoteCommand({
-                            destination64: destination64,
-                            command: command
+                        mockSerialport.emitFrame({
+                            type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                            id: mockXbeeApi.lastFrameId,
+                            commandStatus: 42,
+                            commandData: [ 1, 2, 3, 4 ]
+                        });
+
+                    });
+
+                    it("emits whole packet", function (done) {
+
+                        commandResultStream
+                            .subscribe(function (result) {
+                                result.should.be.type("object");
+                                result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
+                                result.should.have.property("commandStatus", 42);
+                                result.should.have.property("commandData", [ 1, 2, 3, 4 ]);
+                            }, function () {
+                                assert.fail("Stream ended with error");
+                            }, function () {
+                                done();
+                            });
+
+                    });
+
+                });
+
+                describe("with non-matching remote command response frame (wrong id)", function () {
+
+                    beforeEach(function () {
+
+                        mockSerialport.emitFrame({
+                            type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                            id: mockXbeeApi.lastFrameId + 42,
+                            commandStatus: 0,
+                            commandData: [ 1, 2, 3, 4 ]
+                        });
+
+                    });
+
+                    it("does not emit data, complete or error", function (done) {
+
+                        var subscription;
+
+                        setTimeout(function () {
+                            subscription.unsubscribe();
+                            done();
+                        }, 50);
+
+                        subscription = commandResultStream
+                            .subscribe(function () {
+                                assert.fail("Stream contained data");
+                            }, function () {
+                                assert.fail("Stream ended with error");
+                            }, function () {
+                                assert.fail("Stream completed");
+                            });
+
+                    });
+
+                });
+
+                describe("with non-matching remote command response frame (wrong type)", function () {
+
+                    beforeEach(function () {
+
+                        mockSerialport.emitFrame({
+                            type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                            id: mockXbeeApi.lastFrameId,
+                            commandStatus: 0,
+                            commandData: [ 1, 2, 3, 4 ]
+                        });
+
+                    });
+
+                    it("does not emit data, complete or error", function (done) {
+
+                        var subscription;
+
+                        setTimeout(function () {
+                            subscription.unsubscribe();
+                            done();
+                        }, 50);
+
+                        subscription = commandResultStream
+                            .subscribe(function () {
+                                assert.fail("Stream contained data");
+                            }, function () {
+                                assert.fail("Stream ended with error");
+                            }, function () {
+                                assert.fail("Stream completed");
+                            });
+
+                    });
+
+                });
+
+                describe("with transmit failure remote command response frame", function () {
+
+                    beforeEach(function () {
+
+                        mockSerialport.emitFrame({
+                            type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                            id: mockXbeeApi.lastFrameId,
+                            commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
+                            commandData: [ 1, 2, 3, 4 ]
+                        });
+
+                    });
+
+                    it("ends stream with error", function (done) {
+
+                        commandResultStream
+                            .subscribe(function () {
+                                assert.fail("Stream contained data");
+                            }, function (result) {
+                                result.should.be.instanceof(Error);
+                                result.message.should.be.type("string");
+                                done();
+                            });
+
+                    });
+
+                });
+
+                describe("with no remote command response frame", function () {
+
+                    it("ends stream with error", function (done) {
+
+                        commandResultStream
+                            .subscribe(function () {
+                                assert.fail("Stream contained data");
+                            }, function (result) {
+                                result.should.be.instanceof(Error);
+                                result.message.should.match(/Timed out after 100 ms/);
+                                done();
+                            });
+
+                    });
+
+                });
+
+                describe("with second command to same node", function () {
+
+                    var command2 = "SL";
+
+                    beforeEach(function () {
+
+                        var secondCommandStream = xbee.remoteCommand({
+                            destinationId: destinationId,
+                            command: command2
                         }).pipe(rx.operators.publishLast());
 
-                        // connect to the command stream so that it will send
-                        // packets immediately
-                        commandResultStream.connect();
+                        secondCommandStream.connect();
 
                     });
 
-                    it("returns an Rx stream", function () {
-
-                        //Q.isPromise(commandResultStream).should.equal(true);
-                        return; // TODO
-
-                    });
-
-                    it("sends correct frame", function () {
+                    it("sends remote command frame", function () {
 
                         mockSerialport.lastWrite.should.be.type("object");
                         mockSerialport.lastWrite.should.have.property("built", true);
                         mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
                         mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                        mockSerialport.lastWrite.should.have.property("command", command);
+                        mockSerialport.lastWrite.should.have.property("command", command2);
                         mockSerialport.lastWrite.should.have.property("commandParameter", []);
-                        mockSerialport.lastWrite.should.have.property("destination64", destination64);
+                        mockSerialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
                         mockSerialport.lastWrite.should.have.property("destination16", undefined);
 
                     });
 
-                    describe("with success response frame", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.OK,
-                                commandData: [ 42, 16 ]
-                            });
-
-                        });
-
-                        it("emits whole packet", function (done) {
-
-                            commandResultStream
-                                .subscribe(function (result) {
-                                    result.should.be.type("object");
-                                    result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
-                                    result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.OK);
-                                    result.should.have.property("commandData", [ 42, 16 ]);
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    done();
-                                });
-
-                        });
-
-                    });
-
-                    describe("with non-matching response frame (wrong id)", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId + 42,
-                                commandStatus: 0,
-                                commandData: [ 42, 16 ]
-                            });
-
-                        });
-
-                        it("does not emit data, complete or error", function (done) {
-
-                            var subscription;
-
-                            setTimeout(function () {
-                                subscription.unsubscribe();
-                                done();
-                            }, 50);
-
-                            subscription = commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    assert.fail("Stream completed");
-                                });
-
-                        });
-
-                    });
-
-                    describe("with non-matching response frame (wrong type)", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: 0,
-                                commandData: [ 42, 16 ]
-                            });
-
-                        });
-
-                        it("does not emit data, complete or error", function (done) {
-
-                            var subscription;
-
-                            setTimeout(function () {
-                                subscription.unsubscribe();
-                                done();
-                            }, 50);
-
-                            subscription = commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    assert.fail("Stream completed");
-                                });
-
-                        });
-
-                    });
-
-                    describe("with transmit failure response frame", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
-                                commandData: []
-                            });
-
-                        });
-
-                        it("ends stream with error", function (done) {
-
-                            commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.be.type("string");
-                                    done();
-                                });
-
-                        });
-
-                    });
-
-                    describe("with no response frame", function () {
-
-                        it("ends stream with error", function (done) {
-
-                            commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.match(/Timed out after 100 ms/);
-                                    done();
-                                });
-
-                        });
-
-                    });
-
                 });
 
-                describe("using destination16", function () {
+                describe("with second command to new node", function () {
 
-                    var command = "NI",
-                        destination16 = [ 1, 2 ],
-                        commandParameter = "NODELY",
-                        commandResultStream;
+                    var destinationId2 = "OTHERNODE";
 
                     beforeEach(function () {
 
-                        commandResultStream = xbee.remoteCommand({
-                            destination16: destination16,
-                            command: command,
-                            commandParameter: commandParameter
+                        var secondCommandStream = xbee.remoteCommand({
+                            destinationId: destinationId2,
+                            command: command
                         }).pipe(rx.operators.publishLast());
 
-                        // connect to the command stream so that it will send
-                        // packets immediately
-                        commandResultStream.connect();
+                        secondCommandStream.connect();
 
                     });
 
-                    it("returns an Rx stream", function () {
-
-                        //Q.isPromise(commandResultStream).should.equal(true);
-                        return; // TODO
-
-                    });
-
-                    it("sends correct frame", function () {
+                    it("sends lookup frame", function () {
 
                         mockSerialport.lastWrite.should.be.type("object");
                         mockSerialport.lastWrite.should.have.property("built", true);
-                        mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
+                        mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
                         mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                        mockSerialport.lastWrite.should.have.property("command", command);
-                        mockSerialport.lastWrite.should.have.property("commandParameter", commandParameter);
-                        mockSerialport.lastWrite.should.have.property("destination64", undefined);
-                        mockSerialport.lastWrite.should.have.property("destination16", destination16);
-
-                    });
-
-                    describe("with success response frame", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.ERROR,
-                                commandData: undefined
-                            });
-
-                        });
-
-                        it("emits whole packet", function (done) {
-
-                            commandResultStream
-                                .subscribe(function (result) {
-                                    result.should.be.type("object");
-                                    result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
-                                    result.should.have.property("commandStatus", mockXbeeApi.constants.COMMAND_STATUS.ERROR);
-                                    result.should.have.property("commandData", undefined);
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    done();
-                                });
-
-                        });
-
-                    });
-
-                    describe("with non-matching response frame (wrong id)", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId + 42,
-                                commandStatus: 0,
-                                commandData: []
-                            });
-
-                        });
-
-                        it("does not emit data, complete or error", function (done) {
-
-                            var subscription;
-
-                            setTimeout(function () {
-                                subscription.unsubscribe();
-                                done();
-                            }, 50);
-
-                            subscription = commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    assert.fail("Stream completed");
-                                });
-
-                        });
-
-                    });
-
-                    describe("with non-matching response frame (wrong type)", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: 0,
-                                commandData: []
-                            });
-
-                        });
-
-                        it("does not emit data, complete or error", function (done) {
-
-                            var subscription;
-
-                            setTimeout(function () {
-                                subscription.unsubscribe();
-                                done();
-                            }, 50);
-
-                            subscription = commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function () {
-                                    assert.fail("Stream ended with error");
-                                }, function () {
-                                    assert.fail("Stream completed");
-                                });
-
-                        });
-
-                    });
-
-                    describe("with transmit failure response frame", function () {
-
-                        beforeEach(function () {
-
-                            mockSerialport.emitFrame({
-                                type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                id: mockXbeeApi.lastFrameId,
-                                commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
-                                commandData: []
-                            });
-
-                        });
-
-                        it("ends stream with error", function (done) {
-
-                            commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.be.type("string");
-                                    done();
-                                });
-
-                        });
-
-                    });
-
-                    describe("with no response frame", function () {
-
-                        it("ends stream with error", function (done) {
-
-                            commandResultStream
-                                .subscribe(function () {
-                                    assert.fail("Stream contained data");
-                                }, function (result) {
-                                    result.should.be.instanceof(Error);
-                                    result.message.should.match(/Timed out after 100 ms/);
-                                    done();
-                                });
-
-                        });
+                        mockSerialport.lastWrite.should.have.property("command", "DN");
+                        mockSerialport.lastWrite.should.have.property("commandParameter", destinationId2);
 
                     });
 
                 });
 
-                if (module !== "802.15.4") {
+            });
 
-                    describe("using destinationId", function () {
+            describe("with non-matching lookup response frame (wrong id)", function () {
 
-                        var command = "SH",
-                            destinationId = "TESTNODE",
-                            commandResultStream;
+                beforeEach(function () {
 
-                        beforeEach(function () {
-
-                            commandResultStream = xbee.remoteCommand({
-                                destinationId: destinationId,
-                                command: command
-                            }).pipe(rx.operators.publishLast());
-
-                            // connect to the command stream so that it will send
-                            // packets immediately
-                            commandResultStream.connect();
-
-                        });
-
-                        it("returns an Rx stream", function () {
-
-                            //Q.isPromise(commandResultStream).should.equal(true);
-                            return; // TODO
-
-                        });
-
-                        it("sends lookup frame", function () {
-
-                            mockSerialport.lastWrite.should.be.type("object");
-                            mockSerialport.lastWrite.should.have.property("built", true);
-                            mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                            mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                            mockSerialport.lastWrite.should.have.property("command", "DN");
-                            mockSerialport.lastWrite.should.have.property("commandParameter", destinationId);
-
-                        });
-
-                        describe("with lookup success response frame", function () {
-
-                            beforeEach(function () {
-
-                                mockSerialport.emitFrame({
-                                    type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                    id: mockXbeeApi.lastFrameId,
-                                    commandStatus: 0,
-                                    commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
-                                });
-
-                            });
-
-                            it("sends remote command frame", function () {
-
-                                mockSerialport.lastWrite.should.be.type("object");
-                                mockSerialport.lastWrite.should.have.property("built", true);
-                                mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
-                                mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                                mockSerialport.lastWrite.should.have.property("command", command);
-                                mockSerialport.lastWrite.should.have.property("commandParameter", []);
-                                mockSerialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                mockSerialport.lastWrite.should.have.property("destination16", undefined);
-
-                            });
-
-                            describe("with remote command success response frame", function () {
-
-                                beforeEach(function () {
-
-                                    mockSerialport.emitFrame({
-                                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                        id: mockXbeeApi.lastFrameId,
-                                        commandStatus: 42,
-                                        commandData: [ 1, 2, 3, 4 ]
-                                    });
-
-                                });
-
-                                it("emits whole packet", function (done) {
-
-                                    commandResultStream
-                                        .subscribe(function (result) {
-                                            result.should.be.type("object");
-                                            result.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE);
-                                            result.should.have.property("commandStatus", 42);
-                                            result.should.have.property("commandData", [ 1, 2, 3, 4 ]);
-                                        }, function () {
-                                            assert.fail("Stream ended with error");
-                                        }, function () {
-                                            done();
-                                        });
-
-                                });
-
-                            });
-
-                            describe("with non-matching remote command response frame (wrong id)", function () {
-
-                                beforeEach(function () {
-
-                                    mockSerialport.emitFrame({
-                                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                        id: mockXbeeApi.lastFrameId + 42,
-                                        commandStatus: 0,
-                                        commandData: [ 1, 2, 3, 4 ]
-                                    });
-
-                                });
-
-                                it("does not emit data, complete or error", function (done) {
-
-                                    var subscription;
-
-                                    setTimeout(function () {
-                                        subscription.unsubscribe();
-                                        done();
-                                    }, 50);
-
-                                    subscription = commandResultStream
-                                        .subscribe(function () {
-                                            assert.fail("Stream contained data");
-                                        }, function () {
-                                            assert.fail("Stream ended with error");
-                                        }, function () {
-                                            assert.fail("Stream completed");
-                                        });
-
-                                });
-
-                            });
-
-                            describe("with non-matching remote command response frame (wrong type)", function () {
-
-                                beforeEach(function () {
-
-                                    mockSerialport.emitFrame({
-                                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                        id: mockXbeeApi.lastFrameId,
-                                        commandStatus: 0,
-                                        commandData: [ 1, 2, 3, 4 ]
-                                    });
-
-                                });
-
-                                it("does not emit data, complete or error", function (done) {
-
-                                    var subscription;
-
-                                    setTimeout(function () {
-                                        subscription.unsubscribe();
-                                        done();
-                                    }, 50);
-
-                                    subscription = commandResultStream
-                                        .subscribe(function () {
-                                            assert.fail("Stream contained data");
-                                        }, function () {
-                                            assert.fail("Stream ended with error");
-                                        }, function () {
-                                            assert.fail("Stream completed");
-                                        });
-
-                                });
-
-                            });
-
-                            describe("with transmit failure remote command response frame", function () {
-
-                                beforeEach(function () {
-
-                                    mockSerialport.emitFrame({
-                                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                        id: mockXbeeApi.lastFrameId,
-                                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
-                                        commandData: [ 1, 2, 3, 4 ]
-                                    });
-
-                                });
-
-                                it("ends stream with error", function (done) {
-
-                                    commandResultStream
-                                        .subscribe(function () {
-                                            assert.fail("Stream contained data");
-                                        }, function (result) {
-                                            result.should.be.instanceof(Error);
-                                            result.message.should.be.type("string");
-                                            done();
-                                        });
-
-                                });
-
-                            });
-
-                            describe("with no remote command response frame", function () {
-
-                                it("ends stream with error", function (done) {
-
-                                    commandResultStream
-                                        .subscribe(function () {
-                                            assert.fail("Stream contained data");
-                                        }, function (result) {
-                                            result.should.be.instanceof(Error);
-                                            result.message.should.match(/Timed out after 100 ms/);
-                                            done();
-                                        });
-
-                                });
-
-                            });
-
-                            describe("with second command to same node", function () {
-
-                                var command2 = "SL";
-
-                                beforeEach(function () {
-
-                                    var secondCommandStream = xbee.remoteCommand({
-                                        destinationId: destinationId,
-                                        command: command2
-                                    }).pipe(rx.operators.publishLast());
-
-                                    secondCommandStream.connect();
-
-                                });
-
-                                it("sends remote command frame", function () {
-
-                                    mockSerialport.lastWrite.should.be.type("object");
-                                    mockSerialport.lastWrite.should.have.property("built", true);
-                                    mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.REMOTE_AT_COMMAND_REQUEST);
-                                    mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                                    mockSerialport.lastWrite.should.have.property("command", command2);
-                                    mockSerialport.lastWrite.should.have.property("commandParameter", []);
-                                    mockSerialport.lastWrite.should.have.property("destination64", [ 3, 4, 5, 6, 7, 8, 9, 10 ]);
-                                    mockSerialport.lastWrite.should.have.property("destination16", undefined);
-
-                                });
-
-                            });
-
-                            describe("with second command to new node", function () {
-
-                                var destinationId2 = "OTHERNODE";
-
-                                beforeEach(function () {
-
-                                    var secondCommandStream = xbee.remoteCommand({
-                                        destinationId: destinationId2,
-                                        command: command
-                                    }).pipe(rx.operators.publishLast());
-
-                                    secondCommandStream.connect();
-
-                                });
-
-                                it("sends lookup frame", function () {
-
-                                    mockSerialport.lastWrite.should.be.type("object");
-                                    mockSerialport.lastWrite.should.have.property("built", true);
-                                    mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                                    mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                                    mockSerialport.lastWrite.should.have.property("command", "DN");
-                                    mockSerialport.lastWrite.should.have.property("commandParameter", destinationId2);
-
-                                });
-
-                            });
-
-                        });
-
-                        describe("with non-matching lookup response frame (wrong id)", function () {
-
-                            beforeEach(function () {
-
-                                mockSerialport.emitFrame({
-                                    type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                    id: mockXbeeApi.lastFrameId + 42,
-                                    commandStatus: 0,
-                                    commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
-                                });
-
-                            });
-
-                            it("does not emit data, complete or error", function (done) {
-
-                                var subscription;
-
-                                setTimeout(function () {
-                                    subscription.unsubscribe();
-                                    done();
-                                }, 50);
-
-                                subscription = commandResultStream
-                                    .subscribe(function () {
-                                        assert.fail("Stream contained data");
-                                    }, function () {
-                                        assert.fail("Stream ended with error");
-                                    }, function () {
-                                        assert.fail("Stream completed");
-                                    });
-
-                            });
-
-                        });
-
-                        describe("with non-matching lookup response frame (wrong type)", function () {
-
-                            beforeEach(function () {
-
-                                mockSerialport.emitFrame({
-                                    type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
-                                    id: mockXbeeApi.lastFrameId,
-                                    commandStatus: 0,
-                                    commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
-                                });
-
-                            });
-
-                            it("does not emit data, complete or error", function (done) {
-
-                                var subscription;
-
-                                setTimeout(function () {
-                                    subscription.unsubscribe();
-                                    done();
-                                }, 50);
-
-                                subscription = commandResultStream
-                                    .subscribe(function () {
-                                        assert.fail("Stream contained data");
-                                    }, function () {
-                                        assert.fail("Stream ended with error");
-                                    }, function () {
-                                        assert.fail("Stream completed");
-                                    });
-
-                            });
-
-                        });
-
-                        describe("with transmit failure lookup response frame", function () {
-
-                            beforeEach(function () {
-
-                                mockSerialport.emitFrame({
-                                    type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
-                                    id: mockXbeeApi.lastFrameId,
-                                    commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
-                                    commandData: [ ]
-                                });
-
-                            });
-
-                            it("ends stream with 'not found' error", function (done) {
-
-                                commandResultStream
-                                    .subscribe(function () {
-                                        assert.fail("Stream contained data");
-                                    }, function (result) {
-                                        result.should.be.instanceof(Error);
-                                        result.message.should.equal("Node not found");
-                                        done();
-                                    });
-
-                            });
-
-                        });
-
-                        describe("with no lookup response frame", function () {
-
-                            it("ends stream with 'not found' error", function (done) {
-
-                                commandResultStream
-                                    .subscribe(function () {
-                                        assert.fail("Stream contained data");
-                                    }, function (result) {
-                                        result.should.be.instanceof(Error);
-                                        result.message.should.equal("Node not found");
-                                        done();
-                                    });
-
-                            });
-
-                        });
-
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId + 42,
+                        commandStatus: 0,
+                        commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
                     });
 
-                }
+                });
+
+                it("does not emit data, complete or error", function (done) {
+
+                    var subscription;
+
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with non-matching lookup response frame (wrong type)", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: 0,
+                        commandData: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+                    });
+
+                });
+
+                it("does not emit data, complete or error", function (done) {
+
+                    var subscription;
+
+                    setTimeout(function () {
+                        subscription.unsubscribe();
+                        done();
+                    }, 50);
+
+                    subscription = commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function () {
+                            assert.fail("Stream ended with error");
+                        }, function () {
+                            assert.fail("Stream completed");
+                        });
+
+                });
+
+            });
+
+            describe("with transmit failure lookup response frame", function () {
+
+                beforeEach(function () {
+
+                    mockSerialport.emitFrame({
+                        type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
+                        id: mockXbeeApi.lastFrameId,
+                        commandStatus: mockXbeeApi.constants.COMMAND_STATUS.REMOTE_CMD_TRANS_FAILURE,
+                        commandData: [ ]
+                    });
+
+                });
+
+                it("ends stream with 'not found' error", function (done) {
+
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.equal("Node not found");
+                            done();
+                        });
+
+                });
+
+            });
+
+            describe("with no lookup response frame", function () {
+
+                it("ends stream with 'not found' error", function (done) {
+
+                    commandResultStream
+                        .subscribe(function () {
+                            assert.fail("Stream contained data");
+                        }, function (result) {
+                            result.should.be.instanceof(Error);
+                            result.message.should.equal("Node not found");
+                            done();
+                        });
+
+                });
 
             });
 
