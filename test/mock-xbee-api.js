@@ -12,40 +12,38 @@
 
 "use strict";
 
-var events = require("events");
-var util = require("util");
+var stream = require("stream");
 var xbeeApi = require("xbee-api");
+
 
 var mockdata = {
     options: null,
     opened: false,
     emitFrame: null,
     lastFrameId: 0,
-    parser: function fauxParser() { return; }
 };
 
 function MockXBeeAPI(options) {
-    events.EventEmitter.call(this);
-
     mockdata.options = options;
     mockdata.opened = true;
-    mockdata.emitFrame = this.emitFrame.bind(this);
-}
 
-util.inherits(MockXBeeAPI, events.EventEmitter);
+    var self = this;
+    this.builder = new stream.Transform( { objectMode: true } );
+    this.builder._transform = function (frame, _enc, cb) {
+        self.builder.push(self.buildFrame(frame));
+        cb();
+    };
+
+    this.parser = new stream.Transform( { objectMode: true } );
+    this.parser._transform = function (frame, _enc, cb) {
+        self.parser.push(frame);
+        cb();
+    };
+}
 
 MockXBeeAPI.prototype.buildFrame = function (frame) {
     frame.built = true;
     return frame;
-};
-
-MockXBeeAPI.prototype.emitFrame = function (frame) {
-    this.emit("frame_object", frame);
-};
-
-// Parsing isn't actually needed
-MockXBeeAPI.prototype.rawParser = function () {
-    return mockdata.fauxParser;
 };
 
 MockXBeeAPI.prototype.nextFrameId = function () {

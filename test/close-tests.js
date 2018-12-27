@@ -13,16 +13,17 @@
 
 "use strict";
 
+var proxyquire = require("proxyquire").noCallThru();
 require("should");
 
-var proxyquire = require("proxyquire");
-var mockserialport = require("./mock-serialport.js");
+var mockSerialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    "serialport": mockserialport.MockSerialPort,
+    "serialport": mockSerialport.MockSerialPort,
     "xbee-api": mockXbeeApi
 });
+
 
 describe("xbee-rx", function () {
 
@@ -39,15 +40,15 @@ describe("xbee-rx", function () {
 
         it("drains and then closes serialport", function () {
 
-            mockserialport.drained.should.equal(false);
-            mockserialport.closed.should.equal(false);
-            mockserialport.closedBeforeDrained.should.equal(false);
+            mockSerialport.drained.should.equal(false);
+            mockSerialport.closed.should.equal(false);
+            mockSerialport.closedBeforeDrained.should.equal(false);
 
             xbee.close();
 
-            mockserialport.drained.should.equal(true);
-            mockserialport.closed.should.equal(true);
-            mockserialport.closedBeforeDrained.should.equal(false);
+            mockSerialport.drained.should.equal(true);
+            mockSerialport.closed.should.equal(true);
+            mockSerialport.closedBeforeDrained.should.equal(false);
 
         });
 

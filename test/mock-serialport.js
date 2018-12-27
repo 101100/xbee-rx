@@ -18,6 +18,10 @@
 
 "use strict";
 
+var stream = require("stream");
+var util = require("util");
+
+
 var mockdata = {
     path: null,
     options: null,
@@ -29,16 +33,18 @@ var mockdata = {
 };
 
 function MockSerialPort(path, options) {
+    stream.Duplex.call(this, { objectMode: true });
     this.paused = false;
+    this.nextFrame = null;
+    // this.pause();
 
     mockdata.path = path;
     mockdata.options = options;
     mockdata.opened = true;
+    mockdata.emitFrame = this.emitFrame.bind(this);
 }
 
-MockSerialPort.prototype.write = function (data) {
-    mockdata.lastWrite = data;
-};
+util.inherits(MockSerialPort, stream.Duplex);
 
 MockSerialPort.prototype.close = function () {
     mockdata.closedBeforeDrained = !mockdata.drained;
@@ -48,6 +54,19 @@ MockSerialPort.prototype.close = function () {
 MockSerialPort.prototype.drain = function (callback) {
     mockdata.drained = true;
     callback();
+};
+
+MockSerialPort.prototype.emitFrame = function (frame) {
+    this.emit("data", frame);
+};
+
+MockSerialPort.prototype._read = function () {
+    // do nothing as we emit data in emitFrame
+};
+
+MockSerialPort.prototype._write = function (frame, _enc, cb) {
+    mockdata.lastWrite = frame;
+    cb();
 };
 
 module.exports = mockdata;

@@ -14,19 +14,19 @@
 "use strict";
 
 var assert = require("assert");
-require("should");
-
+var proxyquire = require("proxyquire").noCallThru();
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
+require("should");
 
-var proxyquire = require("proxyquire");
-var mockserialport = require("./mock-serialport.js");
+var mockSerialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    "serialport": mockserialport.MockSerialPort,
+    "serialport": mockSerialport.MockSerialPort,
     "xbee-api": mockXbeeApi
 });
+
 
 describe("xbee-rx", function () {
 
@@ -148,12 +148,12 @@ describe("xbee-rx", function () {
 
                     it("sends correct frame", function () {
 
-                        mockserialport.lastWrite.should.be.type("object");
-                        mockserialport.lastWrite.should.have.property("built", true);
-                        mockserialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
-                        mockserialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
-                        mockserialport.lastWrite.should.have.property("command", command);
-                        mockserialport.lastWrite.should.have.property("commandParameter", []);
+                        mockSerialport.lastWrite.should.be.type("object");
+                        mockSerialport.lastWrite.should.have.property("built", true);
+                        mockSerialport.lastWrite.should.have.property("type", mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND);
+                        mockSerialport.lastWrite.should.have.property("id", mockXbeeApi.lastFrameId);
+                        mockSerialport.lastWrite.should.have.property("command", command);
+                        mockSerialport.lastWrite.should.have.property("commandParameter", []);
 
                     });
 
@@ -161,7 +161,7 @@ describe("xbee-rx", function () {
 
                         beforeEach(function () {
 
-                            mockXbeeApi.emitFrame({
+                            mockSerialport.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
                                 commandStatus: 0,
@@ -175,8 +175,8 @@ describe("xbee-rx", function () {
                             commandResultStream
                                 .subscribe(function (result) {
                                     result.should.eql([ 64, 159, 115, 3 ]);
-                                }, function () {
-                                    assert.fail("Stream ended with error");
+                                }, function (e) {
+                                    assert.fail("Stream ended with error", e);
                                 }, function () {
                                     done();
                                 });
@@ -189,7 +189,7 @@ describe("xbee-rx", function () {
 
                         beforeEach(function () {
 
-                            mockXbeeApi.emitFrame({
+                            mockSerialport.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId + 42,
                                 commandStatus: 0,
@@ -224,7 +224,7 @@ describe("xbee-rx", function () {
 
                         beforeEach(function () {
 
-                            mockXbeeApi.emitFrame({
+                            mockSerialport.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.REMOTE_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
                                 commandStatus: 0,
@@ -259,7 +259,7 @@ describe("xbee-rx", function () {
 
                         beforeEach(function () {
 
-                            mockXbeeApi.emitFrame({
+                            mockSerialport.emitFrame({
                                 type: mockXbeeApi.constants.FRAME_TYPE.AT_COMMAND_RESPONSE,
                                 id: mockXbeeApi.lastFrameId,
                                 commandStatus: 3,

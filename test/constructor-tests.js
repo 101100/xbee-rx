@@ -13,16 +13,17 @@
 
 "use strict";
 
+var proxyquire = require("proxyquire").noCallThru();
 require("should");
 
-var proxyquire = require("proxyquire");
-var mockserialport = require("./mock-serialport.js");
+var mockSerialport = require("./mock-serialport.js");
 var mockXbeeApi = require("./mock-xbee-api.js");
 
 var xbeeRx = proxyquire("../lib/xbee-rx.js", {
-    "serialport": mockserialport.MockSerialPort,
+    "serialport": mockSerialport.MockSerialPort,
     "xbee-api": mockXbeeApi
 });
+
 
 describe("xbee-rx", function () {
 
@@ -131,21 +132,8 @@ describe("xbee-rx", function () {
 
             xbee = xbeeRx({ serialport: serialport, module: "ZigBee" });
             xbee.should.be.type("object");
-            mockserialport.opened.should.equal(true);
-            mockserialport.path.should.equal(serialport);
-
-        });
-
-        it("passes parser to serialport", function () {
-
-            var serialport = "fake serialport path",
-                xbee;
-
-            xbee = xbeeRx({ serialport: serialport, module: "ZigBee" });
-            xbee.should.be.type("object");
-            mockserialport.opened.should.equal(true);
-            mockserialport.options.should.be.type("object");
-            mockserialport.options.should.have.property("parser", mockXbeeApi.fauxParser);
+            mockSerialport.opened.should.equal(true);
+            mockSerialport.path.should.equal(serialport);
 
         });
 
@@ -161,12 +149,11 @@ describe("xbee-rx", function () {
 
             xbee = xbeeRx({ serialport: serialport, module: "ZigBee", serialportOptions: serialportOptions });
             xbee.should.be.type("object");
-            mockserialport.opened.should.equal(true);
-            mockserialport.options.should.be.type("object");
-            mockserialport.options.should.have.property("parser", mockXbeeApi.fauxParser);
-            mockserialport.options.should.have.property("string", "never");
-            mockserialport.options.should.have.property("numeric", 42);
-            mockserialport.options.should.have.property("other", serialportOptions.other);
+            mockSerialport.opened.should.equal(true);
+            mockSerialport.options.should.be.type("object");
+            mockSerialport.options.should.have.property("string", "never");
+            mockSerialport.options.should.have.property("numeric", 42);
+            mockSerialport.options.should.have.property("other", serialportOptions.other);
 
         });
 
