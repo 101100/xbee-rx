@@ -17,15 +17,16 @@
 
 "use strict";
 
-var xbeeRx = require("../lib/xbee-rx.js");
-
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
+
+var xbeeRx = require("../lib/xbee-rx.js");
+
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee",
     // turn on debugging to see what the library is doing
@@ -49,7 +50,7 @@ var buttonPressStream = xbee.monitorIODataPackets().pipe(
             return x.value === 1 && x.interval < 1000;
         }),
         // ignore multiple button presses within one second
-        rx.operators.throttle(1000)
+        rx.operators.throttleTime(1000)
     );
 
 buttonPressStream

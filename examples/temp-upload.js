@@ -18,11 +18,12 @@
 
 "use strict";
 
+var request = require("request");
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
 
-var request = require("request");
 var xbeeRx = require("../lib/xbee-rx.js");
+
 
 var requestPut = rx.Observable.fromNodeCallback(request.put);
 
@@ -69,7 +70,7 @@ function computeMean(samples) {
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee",
     // turn on debugging to see what the library is doing
@@ -87,7 +88,7 @@ var temperatureStream = xbee.monitorIODataPackets().pipe(
 );
 
 var meanTemperatureStream = temperatureStream.pipe(
-    rx.operators.buffer(function () { return rx.timer(60000); }), // collect 60 seconds of packets
+    rx.operators.bufferTime(60000), // collect 60 seconds of packets
     rx.operators.map(computeMean), // compute the mean of the collected samples
     rx.operators.map(function (value) { return Math.round(value * 10) / 10; }) // round to 1 decimal place
 );

@@ -14,14 +14,15 @@
 
 var rx = require("rxjs");
 rx.operators = require("rxjs/operators");
-
 var xbee_api = require("xbee-api");
+
 var xbeeRx = require("../lib/xbee-rx.js");
+
 
 var xbee = xbeeRx({
     serialport: "/dev/ttyUSB0",
     serialportOptions: {
-        baudrate: 57600
+        baudRate: 57600
     },
     module: "ZigBee",
     // turn on debugging to see what the library is doing
@@ -53,7 +54,7 @@ xbee
             var timeoutMs = ntResult.readInt16BE(0) * 100;
             console.log("Got node discovery timeout:", timeoutMs, "ms");
             return nodeDiscoveryRepliesStream.pipe(
-                rx.operators.takeUnitl(rx.timer(timeoutMs + 1000)),
+                rx.operators.takeUntil(rx.timer(timeoutMs + 1000)),
                 rx.operators.merge(nodeDiscoveryCommandStream)
             );
         })
