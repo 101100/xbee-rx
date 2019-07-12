@@ -41,7 +41,7 @@ var xbeeRx = require('xbee-rx');
 
 var xbee = xbeeRx({
     serialport: '/dev/ttyUSB0',
-    serialPortOptions: {
+    serialportOptions: {
         baudRate: 57600
     },
     module: "ZigBee"
@@ -54,7 +54,7 @@ Note: if you are using API mode 2, you must specify that with the `api_mode` par
 `serialportOptions` (other than `parser` as it is used and set by xbee-rx).  To see
 what the library is doing (during lookups, etc), you can add the debug flag
 (`debug: true`).  Finally, you can set the default timeout for all commands with
-`defaultTimeout`.  The default is 5000 milliseconds.
+`defaultTimeoutMs`.  The default is 5000 milliseconds.
 
 ### Local commands
 
