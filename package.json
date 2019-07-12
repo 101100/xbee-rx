@@ -1,6 +1,6 @@
 {
   "name": "xbee-rx",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Reactive extensions library for XBee wireless modules based on xbee-api",
   "author": {
     "name": "Jason Heard",
