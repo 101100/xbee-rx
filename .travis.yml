@@ -4,7 +4,6 @@ before_install:
  - yarn config set ignore-engines true
 
 node_js:
-  - "4"
   - "6"
   - "8"
   - "10"
