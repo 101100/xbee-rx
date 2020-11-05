@@ -31,7 +31,7 @@
   "dependencies": {
     "parambulator": "^1.5",
     "rxjs": "^6.3.3",
-    "serialport": "^6.0",
+    "serialport": "^9.0.2",
     "xbee-api": "^0.6.0"
   },
   "devDependencies": {
